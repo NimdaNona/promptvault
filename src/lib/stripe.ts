@@ -1,4 +1,6 @@
 import Stripe from 'stripe';
+import 'server-only';
+import { TIERS } from './tiers';
 
 // Initialize Stripe with the secret key
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -8,43 +10,8 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 // Note: You need to set STRIPE_WEBHOOK_SECRET in your environment variables
 // Get this from your Stripe Dashboard > Webhooks > Signing secret
 
-// Stripe Price IDs from production
-export const PRICE_IDS = {
-  pro_monthly: process.env.STRIPE_PRO_PRICE_ID || 'price_1RlXaFG48MbDPfJlDHIs7KdQ', // $9/month
-  enterprise_monthly: process.env.STRIPE_ENTERPRISE_PRICE_ID || 'price_1RlXaGG48MbDPfJl05xAbzV5', // $29/month
-};
-
-export const TIERS = {
-  free: {
-    name: 'Free',
-    price: 0,
-    limits: {
-      prompts: 50,
-      aiOptimizations: 0,
-      teamMembers: 1,
-    },
-  },
-  pro: {
-    name: 'Pro',
-    price: 9,
-    priceId: PRICE_IDS.pro_monthly,
-    limits: {
-      prompts: -1, // unlimited
-      aiOptimizations: -1,
-      teamMembers: 5,
-    },
-  },
-  enterprise: {
-    name: 'Enterprise',
-    price: 29,
-    priceId: PRICE_IDS.enterprise_monthly,
-    limits: {
-      prompts: -1,
-      aiOptimizations: -1,
-      teamMembers: -1,
-    },
-  },
-};
+// Re-export TIERS for backward compatibility
+export { TIERS } from './tiers';
 
 export async function createCheckoutSession(
   userId: string,

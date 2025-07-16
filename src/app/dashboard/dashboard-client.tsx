@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import PromptCard from "@/components/prompts/prompt-card";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { TIERS } from "@/lib/stripe";
+import { TIERS } from "@/lib/tiers";
 
 interface Prompt {
   id: string;

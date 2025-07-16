@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Check, Loader2, CreditCard, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { TIERS } from "@/lib/stripe";
+import { TIERS } from "@/lib/tiers";
 
 interface BillingClientProps {
   currentTier: string;
