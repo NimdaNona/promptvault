@@ -1,105 +1,148 @@
 # Clerk Production Setup Guide
 
-## Current Status
+## Production Instance Details
+- **Instance ID**: `ins_2zxxRAVxx2LVyEGO61U9rZeCWun`
+- **Environment**: Production
+- **Domain**: `aipromptvault.app`
+- **Frontend API**: `https://clerk.aipromptvault.app`
+- **Accounts Portal**: `https://accounts.aipromptvault.app`
 
-The following Clerk production configurations have been completed:
+## ✅ Completed Configurations
 
-1. **Test Mode Disabled** ✅
-   - Production mode is now active
-
-2. **Custom Sign-in/Sign-up Pages** ✅
-   - Created at `/sign-in` and `/sign-up`
-   - Styled to match PromptVault branding
-   - Configured with proper redirect URLs
-
-3. **Allowed Origins** ✅
-   - Added: `https://aipromptvault.app`
-   - Added: `http://localhost:3000`
-
-4. **Email Configuration** ✅
+### 1. **Instance Settings**
+   - Production mode active
    - Enhanced email deliverability enabled
+   - Progressive sign-up enabled
    - From email: `noreply@clerk.aipromptvault.app`
+   - Support email: `support@aipromptvault.app`
+   - URL-based session syncing enabled
 
-5. **Middleware Configuration** ✅
-   - Protected routes configured
-   - Public routes properly defined
-   - Security headers added
+### 2. **Domain Configuration**
+   - Primary domain: `aipromptvault.app`
+   - All required CNAME records configured:
+     - `clerk.aipromptvault.app` → `frontend-api.clerk.services`
+     - `accounts.aipromptvault.app` → `accounts.clerk.services`
+     - `clkmail.aipromptvault.app` → `mail.ue53si84o1n0.clerk.services`
+     - DKIM records for email authentication
 
-## Required Manual Steps
+### 3. **Allowed Origins**
+   - Production: `https://aipromptvault.app`
+   - Development: `http://localhost:3000`
 
-### 1. Configure Webhook Secret
+### 4. **Redirect URLs**
+   All necessary redirect URLs have been whitelisted:
+   - `https://aipromptvault.app/` (root)
+   - `https://aipromptvault.app/dashboard`
+   - `https://aipromptvault.app/onboarding`
+   - `https://aipromptvault.app/sign-in`
+   - `https://aipromptvault.app/sign-up`
+   - `http://localhost:3000/` (and all equivalent paths)
 
-1. Go to [Clerk Dashboard](https://dashboard.clerk.com)
-2. Navigate to **Webhooks** section
-3. Click **Add Endpoint**
-4. Enter endpoint URL: `https://aipromptvault.app/api/webhooks/clerk`
-5. Select events:
-   - `user.created`
-   - `user.updated`  
-   - `user.deleted`
-6. Copy the **Signing Secret**
-7. Add to `.env.local`:
+### 5. **Custom Authentication Pages**
+   - Sign-in: `/sign-in` - Custom branded page
+   - Sign-up: `/sign-up` - Custom branded page
+   - Onboarding: `/onboarding` - User setup flow
+
+### 6. **Middleware & Routing**
+   - Protected routes: `/dashboard`, `/prompts`, `/settings`, `/api/*`
+   - Public routes: `/`, `/sign-in`, `/sign-up`, `/api/webhooks`, `/share`
+   - Security headers implemented
+
+### 7. **Webhook Configuration**
+   - Svix app created for webhook management
+   - Endpoint ready at: `/api/webhooks/clerk`
+   - Handles: `user.created`, `user.updated`, `user.deleted`
+
+### 8. **Environment Variables**
+   Production keys are already set in `.env.local`:
    ```
-   CLERK_WEBHOOK_SECRET=your_webhook_secret_here
+   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_Y2xlcmsuYWlwcm9tcHR2YXVsdC5hcHAk
+   CLERK_SECRET_KEY=sk_live_36QkcgfkvrEP7JEAEsnmwX3hr2MFUZVp7PzLIjCK4X
    ```
-8. Add to Vercel environment variables
 
-### 2. Update Production Keys (If Needed)
+## 📋 Required Manual Steps
 
-If you're using test keys in production:
+### 1. Configure Webhook Secret in Clerk Dashboard
 
-1. Go to Clerk Dashboard > **API Keys**
-2. Switch to **Production** instance
-3. Copy production keys
-4. Update in Vercel:
-   - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
-   - `CLERK_SECRET_KEY`
+1. Go to the Svix Dashboard URL:
+   ```
+   https://app.svix.com/login?primaryColor=6c47ff&fontFamily=Inter#key=eyJhcHBJZCI6ImFwcF8yenk1dE1hU0pHVTFaSUFtd1RsdFNVb1l5RGciLCJvbmVUaW1lVG9rZW4iOiJERjRRQ0NmRmxrV0tjUG1TOTBTVERCdW9lYm5CaUtWZCIsInJlZ2lvbiI6ImV1In0=
+   ```
 
-### 3. Configure OAuth Providers (Optional)
+2. Create a new endpoint:
+   - URL: `https://aipromptvault.app/api/webhooks/clerk`
+   - Message Types: Select all user events
+   
+3. Copy the **Signing Secret**
 
-To add social login:
+4. Add to `.env.local`:
+   ```
+   CLERK_WEBHOOK_SECRET=whsec_your_webhook_secret_here
+   ```
 
-1. Go to **User & Authentication** > **Social Connections**
-2. Enable desired providers (Google, GitHub, etc.)
-3. Add OAuth redirect URLs for each provider
+5. Add the same to Vercel environment variables
 
-### 4. Email Templates (Optional)
+### 2. Configure Social Authentication (Optional)
 
-Customize email templates:
+To enable Google Sign-In:
+1. Go to Clerk Dashboard > **User & Authentication** > **Social Connections**
+2. Enable **Google**
+3. Add redirect URLs:
+   - `https://clerk.aipromptvault.app/v1/oauth_callback`
+   - `https://accounts.aipromptvault.app/sign-in/oauth_callback`
 
-1. Go to **Customization** > **Emails**
-2. Customize templates for:
-   - Sign up
-   - Sign in
-   - Password reset
-   - Email verification
+To enable GitHub Sign-In:
+1. Enable **GitHub** in Social Connections
+2. Add the same redirect URLs as above
 
-## Verification Steps
+### 3. Verify DNS Configuration
 
-After completing setup:
+Ensure all CNAME records are properly configured:
+```bash
+# Check each subdomain
+nslookup clerk.aipromptvault.app
+nslookup accounts.aipromptvault.app
+nslookup clkmail.aipromptvault.app
+```
 
-1. Test sign up flow at `https://aipromptvault.app/sign-up`
-2. Test sign in flow at `https://aipromptvault.app/sign-in`
-3. Verify webhook events in Clerk Dashboard > Webhooks > Logs
-4. Check user sync in database after sign up
+## 🧪 Verification Steps
 
-## Troubleshooting
+1. **Test Authentication Flow**:
+   - Sign up: `https://aipromptvault.app/sign-up`
+   - Sign in: `https://aipromptvault.app/sign-in`
+   - Verify onboarding redirect works
+
+2. **Test Webhook Integration**:
+   - Create a test user
+   - Check database for user record
+   - Verify webhook logs in Svix dashboard
+
+3. **Test Email Delivery**:
+   - Request password reset
+   - Check email delivery (including spam folder)
+
+## 🔧 Troubleshooting
 
 ### Users Not Syncing to Database
+1. Verify webhook endpoint is accessible
+2. Check `CLERK_WEBHOOK_SECRET` in Vercel
+3. Review Vercel function logs: `/api/webhooks/clerk`
+4. Check Svix dashboard for failed deliveries
 
-1. Check webhook logs in Clerk Dashboard
-2. Verify `CLERK_WEBHOOK_SECRET` is set correctly
-3. Check Vercel function logs for `/api/webhooks/clerk`
+### Authentication Redirect Issues
+1. Ensure all redirect URLs are whitelisted
+2. Check middleware configuration
+3. Verify `NEXT_PUBLIC_APP_URL` is set correctly
 
-### Authentication Issues
+### Email Delivery Problems
+1. Verify DKIM records are configured
+2. Check Clerk email logs in dashboard
+3. Consider using custom SMTP if needed
 
-1. Ensure production keys are used
-2. Verify allowed origins include your domain
-3. Check middleware configuration
+## 🚀 Next Steps
 
-### Email Delivery Issues
-
-If emails aren't delivering:
-1. Enhanced email deliverability is already enabled
-2. Check spam folders
-3. Consider custom domain setup in Clerk
+1. Complete webhook secret configuration
+2. Test full authentication flow in production
+3. Monitor webhook delivery success rate
+4. Consider enabling additional authentication methods
+5. Customize email templates to match brand
