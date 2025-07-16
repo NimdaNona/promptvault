@@ -3,6 +3,9 @@ import { db } from "@/lib/db";
 import { users, prompts } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 
+// Force Node.js runtime for transaction support
+export const runtime = 'nodejs';
+
 export async function POST(req: Request) {
   try {
     const { userId: authUserId } = await auth();
