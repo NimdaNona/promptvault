@@ -27,12 +27,12 @@ export default async function Home() {
           </p>
           
           <div className="flex gap-4 justify-center">
-            <SignUpButton mode="modal">
+            <SignUpButton mode="redirect" forceRedirectUrl="/onboarding">
               <button className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors">
                 Get Started Free
               </button>
             </SignUpButton>
-            <SignInButton mode="modal">
+            <SignInButton mode="redirect" forceRedirectUrl="/dashboard">
               <button className="px-8 py-3 border border-gray-300 dark:border-gray-600 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                 Sign In
               </button>
