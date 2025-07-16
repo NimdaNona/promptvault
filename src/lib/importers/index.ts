@@ -1,4 +1,8 @@
 import { parseChatGPTExport, validateChatGPTExport } from './chatgpt';
+import { parseClaudeExport, parseClaudeCodeJSONL, validateClaudeExport, validateClaudeCodeJSONL } from './claude';
+import { parseGeminiExport, validateGeminiExport } from './gemini';
+import { parseClineExport, validateClineExport } from './cline';
+import { parseCursorExport, validateCursorExport } from './cursor';
 
 export type ImportSource = 'chatgpt' | 'claude' | 'gemini' | 'cline' | 'cursor' | 'file';
 
@@ -42,23 +46,56 @@ export class PromptImporter {
           break;
 
         case 'claude':
-          // TODO: Implement Claude import
-          errors.push('Claude import is coming soon. You can manually copy your prompts for now.');
+          // Check if it's JSONL (Claude Code) or JSON (Claude app)
+          if (file.name.endsWith('.jsonl')) {
+            if (!validateClaudeCodeJSONL(content)) {
+              errors.push('Invalid Claude Code JSONL format. Please check the file.');
+              break;
+            }
+            prompts = parseClaudeCodeJSONL(content);
+          } else {
+            if (!validateClaudeExport(content)) {
+              errors.push('Invalid Claude export format. Please export your data from Claude settings.');
+              break;
+            }
+            prompts = parseClaudeExport(content);
+          }
+          if (prompts.length === 0) {
+            warnings.push('No user prompts found in the Claude export.');
+          }
           break;
 
         case 'gemini':
-          // TODO: Implement Gemini import
-          errors.push('Gemini import is coming soon. You can manually copy your prompts for now.');
+          if (!validateGeminiExport(content)) {
+            errors.push('Invalid Gemini export format.');
+            break;
+          }
+          prompts = parseGeminiExport(content);
+          if (prompts.length === 0) {
+            warnings.push('No user prompts found in the Gemini export.');
+          }
           break;
 
         case 'cline':
-          // TODO: Implement Cline import
-          errors.push('Cline import is coming soon. You can manually copy your prompts for now.');
+          if (!validateClineExport(content)) {
+            errors.push('Invalid Cline chat log format. Please check the file.');
+            break;
+          }
+          prompts = parseClineExport(content);
+          if (prompts.length === 0) {
+            warnings.push('No user prompts found in the Cline chat log.');
+          }
           break;
 
         case 'cursor':
-          // TODO: Implement Cursor import
-          errors.push('Cursor import is coming soon. You can manually copy your prompts for now.');
+          if (!validateCursorExport(content)) {
+            errors.push('Invalid Cursor export format. Please check the file.');
+            break;
+          }
+          prompts = parseCursorExport(content);
+          if (prompts.length === 0) {
+            warnings.push('No user prompts found in the Cursor export.');
+          }
           break;
 
         case 'file':

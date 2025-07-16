@@ -4,17 +4,16 @@ import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Upload, FileText, AlertCircle, CheckCircle, Loader2, ChevronRight } from "lucide-react";
-import { PromptImporter, type ImportSource } from "@/lib/importers";
+import { PromptImporter } from "@/lib/importers";
 import { toast } from "sonner";
 
-interface ImportDialogProps {
-  source: ImportSource;
+interface FileImportDialogProps {
   onClose: () => void;
   onImport: (prompts: any[]) => Promise<void>;
   existingPrompts?: any[];
 }
 
-export default function ImportDialog({ source, onClose, onImport, existingPrompts = [] }: ImportDialogProps) {
+export default function FileImportDialog({ onClose, onImport, existingPrompts = [] }: FileImportDialogProps) {
   const [isImporting, setIsImporting] = useState(false);
   const [importResult, setImportResult] = useState<any>(null);
   const [selectedPrompts, setSelectedPrompts] = useState<Set<number>>(new Set());
@@ -27,7 +26,7 @@ export default function ImportDialog({ source, onClose, onImport, existingPrompt
     setImportResult(null);
 
     try {
-      const result = await PromptImporter.importFromFile(file, source);
+      const result = await PromptImporter.importFromFile(file, 'file');
       
       if (result.errors.length > 0) {
         result.errors.forEach(error => toast.error(error));
@@ -57,7 +56,7 @@ export default function ImportDialog({ source, onClose, onImport, existingPrompt
     } finally {
       setIsImporting(false);
     }
-  }, [source, existingPrompts]);
+  }, [existingPrompts]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -83,7 +82,6 @@ export default function ImportDialog({ source, onClose, onImport, existingPrompt
     setIsImporting(true);
     try {
       await onImport(promptsToImport);
-      toast.success(`Successfully imported ${promptsToImport.length} prompts`);
       onClose();
     } catch (error) {
       console.error('Import error:', error);
@@ -121,7 +119,7 @@ export default function ImportDialog({ source, onClose, onImport, existingPrompt
       >
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Import from {source.charAt(0).toUpperCase() + source.slice(1)}</h2>
+          <h2 className="text-xl font-semibold">Import from File</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
@@ -133,25 +131,58 @@ export default function ImportDialog({ source, onClose, onImport, existingPrompt
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
           {!importResult ? (
-            <div
-              {...getRootProps()}
-              className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors cursor-pointer
-                ${isDragActive 
-                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-                  : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
-                }`}
-            >
-              <input {...getInputProps()} />
-              <Upload className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-              <p className="text-lg font-medium mb-2">
-                {isDragActive ? 'Drop the file here' : 'Drag & drop your export file here'}
-              </p>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                or click to select a file
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-500">
-                Supported formats: JSON, TXT, MD
-              </p>
+            <div className="space-y-6">
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                <div className="flex items-start space-x-3">
+                  <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+                      Supported file formats:
+                    </p>
+                    <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+                      <li>• <strong>JSON</strong>: Array of prompts with 'name' and 'content' fields</li>
+                      <li>• <strong>TXT/MD</strong>: Prompts separated by double newlines</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="font-medium mb-4">Example JSON format:</h3>
+                <pre className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 text-sm overflow-x-auto">
+                  <code>{`[
+  {
+    "name": "Code Review Assistant",
+    "content": "You are an expert code reviewer..."
+  },
+  {
+    "name": "SQL Query Generator",
+    "content": "Generate optimized SQL queries..."
+  }
+]`}</code>
+                </pre>
+              </div>
+
+              <div
+                {...getRootProps()}
+                className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors cursor-pointer
+                  ${isDragActive 
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                    : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+                  }`}
+              >
+                <input {...getInputProps()} />
+                <Upload className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                <p className="text-lg font-medium mb-2">
+                  {isDragActive ? 'Drop the file here' : 'Drag & drop your file here'}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  or click to select a file
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-500">
+                  Supported formats: JSON, TXT, MD
+                </p>
+              </div>
             </div>
           ) : (
             <div className="space-y-4">

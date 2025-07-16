@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Upload, Zap, ArrowRight, X, FileText, MessageSquare, Code2, ChevronRight, Brain, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import ImportDialog from "@/components/import-dialog";
+import ImportDialog from "@/components/import-dialog/index";
 
 interface OnboardingWizardProps {
   userId: string;
