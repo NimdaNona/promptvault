@@ -20,9 +20,10 @@ const updatePromptSchema = z.object({
 // GET /api/prompts/[promptId] - Get a single prompt
 export async function GET(
   req: Request,
-  { params }: { params: { promptId: string } }
+  { params }: { params: Promise<{ promptId: string }> }
 ) {
   try {
+    const { promptId } = await params;
     const { userId } = await auth();
     
     if (!userId) {
@@ -31,7 +32,7 @@ export async function GET(
 
     const prompt = await db.query.prompts.findFirst({
       where: and(
-        eq(prompts.id, params.promptId),
+        eq(prompts.id, promptId),
         eq(prompts.userId, userId)
       ),
       with: {
@@ -66,9 +67,10 @@ export async function GET(
 // PATCH /api/prompts/[promptId] - Update a prompt
 export async function PATCH(
   req: Request,
-  { params }: { params: { promptId: string } }
+  { params }: { params: Promise<{ promptId: string }> }
 ) {
   try {
+    const { promptId } = await params;
     const { userId } = await auth();
     
     if (!userId) {
@@ -81,7 +83,7 @@ export async function PATCH(
     // Check if prompt exists and belongs to user
     const existingPrompt = await db.query.prompts.findFirst({
       where: and(
-        eq(prompts.id, params.promptId),
+        eq(prompts.id, promptId),
         eq(prompts.userId, userId)
       ),
     });
@@ -96,7 +98,7 @@ export async function PATCH(
       if (validatedData.content && validatedData.content !== existingPrompt.content) {
         // Get the latest version number
         const latestVersion = await tx.query.promptVersions.findFirst({
-          where: eq(promptVersions.promptId, params.promptId),
+          where: eq(promptVersions.promptId, promptId),
           orderBy: (versions, { desc }) => [desc(versions.version)],
         });
 
@@ -104,7 +106,7 @@ export async function PATCH(
 
         // Create version record
         await tx.insert(promptVersions).values({
-          promptId: params.promptId,
+          promptId: promptId,
           version: nextVersion,
           content: existingPrompt.content, // Save the old content
           metadata: existingPrompt.metadata,
@@ -126,13 +128,13 @@ export async function PATCH(
           metadata: validatedData.metadata || existingPrompt.metadata,
           updatedAt: new Date(),
         })
-        .where(eq(prompts.id, params.promptId))
+        .where(eq(prompts.id, promptId))
         .returning();
 
       // Update tags if provided
       if (validatedData.tags !== undefined) {
         // Remove existing tags
-        await tx.delete(promptTags).where(eq(promptTags.promptId, params.promptId));
+        await tx.delete(promptTags).where(eq(promptTags.promptId, promptId));
 
         // Add new tags
         for (const tagName of validatedData.tags) {
@@ -154,7 +156,7 @@ export async function PATCH(
 
           // Link tag to prompt
           await tx.insert(promptTags).values({
-            promptId: params.promptId,
+            promptId: promptId,
             tagId: tagRecord.id,
           });
         }
@@ -177,9 +179,10 @@ export async function PATCH(
 // DELETE /api/prompts/[promptId] - Delete a prompt
 export async function DELETE(
   req: Request,
-  { params }: { params: { promptId: string } }
+  { params }: { params: Promise<{ promptId: string }> }
 ) {
   try {
+    const { promptId } = await params;
     const { userId } = await auth();
     
     if (!userId) {
@@ -189,7 +192,7 @@ export async function DELETE(
     // Check if prompt exists and belongs to user
     const existingPrompt = await db.query.prompts.findFirst({
       where: and(
-        eq(prompts.id, params.promptId),
+        eq(prompts.id, promptId),
         eq(prompts.userId, userId)
       ),
     });
@@ -200,7 +203,7 @@ export async function DELETE(
 
     // Delete prompt (cascading will handle related records)
     await db.transaction(async (tx) => {
-      await tx.delete(prompts).where(eq(prompts.id, params.promptId));
+      await tx.delete(prompts).where(eq(prompts.id, promptId));
       
       // Update user's prompt count
       await tx

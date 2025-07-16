@@ -8,8 +8,9 @@ import EditPromptForm from "./edit-prompt-form";
 export default async function EditPromptPage({
   params,
 }: {
-  params: { promptId: string };
+  params: Promise<{ promptId: string }>;
 }) {
+  const { promptId } = await params;
   const { userId } = await auth();
   
   if (!userId) {
@@ -19,7 +20,7 @@ export default async function EditPromptPage({
   // Fetch the prompt
   const prompt = await db.query.prompts.findFirst({
     where: and(
-      eq(prompts.id, params.promptId),
+      eq(prompts.id, promptId),
       eq(prompts.userId, userId)
     ),
     with: {
