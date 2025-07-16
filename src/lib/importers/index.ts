@@ -1,6 +1,18 @@
-import { parseChatGPTExport, validateChatGPTExport, type ExtractedPrompt } from './chatgpt';
+import { parseChatGPTExport, validateChatGPTExport } from './chatgpt';
 
 export type ImportSource = 'chatgpt' | 'claude' | 'gemini' | 'cline' | 'cursor' | 'file';
+
+export interface ExtractedPrompt {
+  name: string;
+  content: string;
+  metadata: {
+    source: ImportSource;
+    conversationId: string;
+    conversationTitle: string;
+    timestamp: number;
+    model?: string;
+  };
+}
 
 export interface ImportResult {
   prompts: ExtractedPrompt[];

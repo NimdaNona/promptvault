@@ -1,3 +1,5 @@
+import type { ExtractedPrompt } from './index';
+
 export interface ChatGPTMessage {
   author: {
     role: string;
@@ -31,18 +33,6 @@ export interface ChatGPTConversation {
 export interface ChatGPTExport {
   conversations: ChatGPTConversation[];
   user?: any;
-}
-
-export interface ExtractedPrompt {
-  name: string;
-  content: string;
-  metadata: {
-    source: 'chatgpt';
-    conversationId: string;
-    conversationTitle: string;
-    timestamp: number;
-    model?: string;
-  };
 }
 
 export function parseChatGPTExport(jsonContent: string): ExtractedPrompt[] {

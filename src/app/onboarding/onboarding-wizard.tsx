@@ -290,7 +290,7 @@ export default function OnboardingWizard({ userId, email, name }: OnboardingWiza
       </div>
 
       {/* Import Dialog */}
-      {showImportDialog && importSource && (
+      {showImportDialog && importSource && importSource !== "none" && (
         <ImportDialog
           source={importSource}
           onClose={() => setShowImportDialog(false)}

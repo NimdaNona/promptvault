@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
-import { prompts, importSessions } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { prompts, importSessions, users } from "@/lib/db/schema";
+import { eq, sql } from "drizzle-orm";
 
 // Force Node.js runtime
 export const runtime = 'nodejs';
@@ -77,9 +77,12 @@ export async function POST(req: Request) {
         .where(eq(importSessions.id, importSession.id));
 
       // Update user's prompt count
-      await tx.execute(
-        db.sql`UPDATE users SET prompt_count = prompt_count + ${imported} WHERE id = ${userId}`
-      );
+      await tx.update(users)
+        .set({ 
+          promptCount: sql`prompt_count + ${imported}`,
+          updatedAt: new Date()
+        })
+        .where(eq(users.id, userId));
     });
 
     return Response.json({

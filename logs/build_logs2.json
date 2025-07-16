@@ -1,0 +1,53 @@
+[18:16:40.102] Running build in Washington, D.C., USA (East) – iad1
+[18:16:40.102] Build machine configuration: 4 cores, 8 GB
+[18:16:40.119] Cloning github.com/NimdaNona/promptvault (Branch: main, Commit: 068b71a)
+[18:16:40.381] Cloning completed: 262.000ms
+[18:16:45.202] Restored build cache from previous deployment (7ZoD2EgtQihMTDzG7BAYFJMxJTnp)
+[18:16:47.756] Running "vercel build"
+[18:16:48.628] Vercel CLI 44.3.0
+[18:16:48.965] Installing dependencies...
+[18:16:51.129] 
+[18:16:51.129] added 6 packages in 2s
+[18:16:51.130] 
+[18:16:51.130] 183 packages are looking for funding
+[18:16:51.130]   run `npm fund` for details
+[18:16:51.166] Detected Next.js version: 15.4.1
+[18:16:51.174] Running "npm run build"
+[18:16:51.305] 
+[18:16:51.305] > promptvault@0.1.0 build
+[18:16:51.305] > next build
+[18:16:51.305] 
+[18:16:52.466]  ⚠ Invalid next.config.ts options detected: 
+[18:16:52.466]  ⚠     Unrecognized key(s) in object: 'serverComponentsExternalPackages' at "experimental"
+[18:16:52.466]  ⚠ See more info here: https://nextjs.org/docs/messages/invalid-next-config
+[18:16:52.468]  ⚠ `experimental.serverComponentsExternalPackages` has been moved to `serverExternalPackages`. Please update your next.config.ts file accordingly.
+[18:16:52.592]    ▲ Next.js 15.4.1
+[18:16:52.592]    - Experiments (use with caution):
+[18:16:52.593]      · serverComponentsExternalPackages
+[18:16:52.593] 
+[18:16:52.628]    Creating an optimized production build ...
+[18:17:01.252]  ⚠ Compiled with warnings in 7.0s
+[18:17:01.253] 
+[18:17:01.253] ./src/app/api/ai/onboarding-suggestion/route.ts
+[18:17:01.253] Attempted import error: 'openai' is not exported from '@/lib/openai' (imported as 'openai').
+[18:17:01.253] 
+[18:17:01.253] Import trace for requested module:
+[18:17:01.253] ./src/app/api/ai/onboarding-suggestion/route.ts
+[18:17:01.253] 
+[18:17:08.419]  ✓ Compiled successfully in 11.0s
+[18:17:08.423]    Linting and checking validity of types ...
+[18:17:16.367] Failed to compile.
+[18:17:16.367] 
+[18:17:16.367] ./src/app/api/ai/onboarding-suggestion/route.ts:2:10
+[18:17:16.368] Type error: Module '"@/lib/openai"' declares 'openai' locally, but it is not exported.
+[18:17:16.368] 
+[18:17:16.368] [0m [90m 1 |[39m [36mimport[39m { auth } [36mfrom[39m [32m"@clerk/nextjs/server"[39m[33m;[39m
+[18:17:16.368] [31m[1m>[22m[39m[90m 2 |[39m [36mimport[39m { openai } [36mfrom[39m [32m"@/lib/openai"[39m[33m;[39m
+[18:17:16.368]  [90m   |[39m          [31m[1m^[22m[39m
+[18:17:16.368]  [90m 3 |[39m
+[18:17:16.368]  [90m 4 |[39m [90m// Force Node.js runtime[39m
+[18:17:16.368]  [90m 5 |[39m [36mexport[39m [36mconst[39m runtime [33m=[39m [32m'nodejs'[39m[33m;[39m[0m
+[18:17:16.403] Next.js build worker exited with code: 1 and signal: null
+[18:17:16.426] Error: Command "npm run build" exited with 1
+[18:17:16.767] 
+[18:17:19.809] Exiting build container
