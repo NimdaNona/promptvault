@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { prompts, promptTags, tags, users } from "@/lib/db/schema";
 import { eq, and, like, desc } from "drizzle-orm";
 import { z } from "zod";
+import { TIERS } from "@/lib/stripe";
 
 // Schema for creating a prompt
 const createPromptSchema = z.object({
@@ -106,8 +107,18 @@ export async function POST(req: Request) {
     }
 
     // Check tier limits
-    if (user.tier === "free" && user.promptCount >= 50) {
-      return new Response("Prompt limit reached. Please upgrade to Pro.", { status: 403 });
+    const tierLimits = TIERS[user.tier as keyof typeof TIERS].limits;
+    if (tierLimits.prompts !== -1 && user.promptCount >= tierLimits.prompts) {
+      return new Response(
+        JSON.stringify({ 
+          error: "Prompt limit reached", 
+          message: `You've reached the ${tierLimits.prompts} prompt limit for the ${user.tier} tier. Please upgrade to create more prompts.` 
+        }), 
+        { 
+          status: 403,
+          headers: { "Content-Type": "application/json" }
+        }
+      );
     }
 
     // Create prompt and handle tags

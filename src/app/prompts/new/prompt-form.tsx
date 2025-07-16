@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import PromptOptimizer from "@/components/prompts/prompt-optimizer";
 import { toast } from "sonner";
 import Link from "next/link";
 
@@ -21,12 +22,14 @@ interface FormData {
 export default function PromptForm() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<FormData>({
     defaultValues: {
       model: "gpt-4",
       isPublic: false,
     },
   });
+
+  const currentContent = watch("content");
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
@@ -111,6 +114,14 @@ export default function PromptForm() {
           {errors.content && (
             <p className="text-red-500 text-sm mt-1">{errors.content.message}</p>
           )}
+          
+          {/* AI Optimizer */}
+          <div className="mt-4">
+            <PromptOptimizer 
+              prompt={currentContent || ""}
+              onOptimize={(optimized) => setValue("content", optimized)}
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">

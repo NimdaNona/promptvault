@@ -2,77 +2,97 @@
 
 ## Prerequisites
 
-Before deploying PromptVault, you'll need to set up the following services:
+Before deploying PromptVault, ensure you have:
 
-1. **Clerk Account** - For authentication
-2. **Vercel Account** - For hosting and database
-3. **OpenAI API Key** - For AI features
-4. **Stripe Account** - For payments
+1. **Stripe Account**: Create products and prices in your Stripe Dashboard
+2. **Clerk Account**: Set up your authentication
+3. **Neon Database**: PostgreSQL database set up
+4. **OpenAI API Key**: For AI optimization features
+5. **Vercel Account**: For deployment
 
 ## Environment Variables
 
-Copy `.env.example` to `.env.local` and fill in all the required values:
+Create a `.env.local` file with these variables:
 
 ```bash
-cp .env.example .env.local
+# Clerk Authentication
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+CLERK_SECRET_KEY=your_clerk_secret_key
+
+# Neon Database
+DATABASE_URL=your_neon_pooled_connection_url
+POSTGRES_URL=your_neon_pooled_connection_url
+
+# OpenAI
+OPENAI_API_KEY=your_openai_api_key
+
+# Stripe
+STRIPE_SECRET_KEY=your_stripe_secret_key
+STRIPE_WEBHOOK_SECRET=whsec_feUTuTFfliVnBf3NwLFw0KnbSqWnbfa0
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+STRIPE_PRO_PRICE_ID=price_1RlXaFG48MbDPfJlDHIs7KdQ
+STRIPE_ENTERPRISE_PRICE_ID=price_1RlXaGG48MbDPfJl05xAbzV5
+
+# App URL
+NEXT_PUBLIC_APP_URL=https://aipromptvault.app
 ```
 
-### Required Environment Variables:
+## Stripe Setup (Already Configured)
 
-1. **Clerk Authentication**
-   - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - Get from Clerk Dashboard
-   - `CLERK_SECRET_KEY` - Get from Clerk Dashboard
-   - `CLERK_WEBHOOK_SECRET` - Create webhook endpoint in Clerk pointing to `/api/webhooks/clerk`
+1. **Products Created**:
+   - Pro Plan ($9/month): Product ID: prod_SgvRtycGt2k5UT
+   - Enterprise Plan ($29/month): Product ID: prod_SgvRxzqeGaePDa
 
-2. **Database (Vercel Postgres)**
-   - Create a Postgres database in Vercel Dashboard
-   - Copy all database URLs from the connection settings
+2. **Price IDs**:
+   - Pro: price_1RlXaFG48MbDPfJlDHIs7KdQ
+   - Enterprise: price_1RlXaGG48MbDPfJl05xAbzV5
 
-3. **OpenAI**
-   - `OPENAI_API_KEY` - Get from OpenAI Platform
+3. **Webhook Configured**:
+   - Endpoint: `https://aipromptvault.app/api/webhooks/stripe`
+   - Events: checkout.session.completed, customer.subscription.updated, customer.subscription.deleted
+   - Secret: Configured in environment variables
 
-4. **Stripe**
-   - `STRIPE_SECRET_KEY` - Get from Stripe Dashboard
-   - `STRIPE_WEBHOOK_SECRET` - Create webhook endpoint in Stripe
-   - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` - Get from Stripe Dashboard
+## Database Setup
+
+Run the migration to set up your database schema:
+
+```bash
+npm run db:push
+```
 
 ## Deployment Steps
 
-1. **Push to GitHub**
+1. **Push to GitHub**:
    ```bash
    git add .
-   git commit -m "Ready for deployment"
+   git commit -m "Initial deployment"
    git push origin main
    ```
 
-2. **Deploy to Vercel**
-   ```bash
-   vercel --prod
-   ```
+2. **Deploy to Vercel**:
+   - Connect your GitHub repository to Vercel
+   - Add all environment variables in Vercel dashboard
+   - Deploy
 
-3. **Set Environment Variables in Vercel**
-   - Go to your project in Vercel Dashboard
-   - Navigate to Settings > Environment Variables
-   - Add all variables from your `.env.local` file
+3. **Post-Deployment**:
+   - Test authentication flow
+   - Test Stripe checkout
+   - Test AI optimization (Pro/Enterprise only)
+   - Test sharing functionality
 
-4. **Run Database Migrations**
-   ```bash
-   npm run db:push
-   ```
+## Important Notes
 
-5. **Configure Webhooks**
-   - Clerk: Set webhook URL to `https://your-app.vercel.app/api/webhooks/clerk`
-   - Stripe: Set webhook URL to `https://your-app.vercel.app/api/webhooks/stripe`
-
-## Post-Deployment
-
-1. Test the authentication flow
-2. Create a test prompt
-3. Test the payment flow with Stripe test cards
-4. Monitor logs in Vercel Dashboard
+- **Stripe Webhook Secret**: Must be set for subscription management to work
+- **Database Migrations**: Run `npm run db:push` after any schema changes
+- **API Keys Security**: Never commit API keys to version control
+- **Tier Limits**: 
+  - Free: 50 prompts, no AI features
+  - Pro: Unlimited prompts, AI features, 5 team members
+  - Enterprise: Everything in Pro + unlimited team members
 
 ## Troubleshooting
 
-- If build fails, check all environment variables are set correctly
-- For database issues, ensure Vercel Postgres is properly configured
-- For authentication issues, verify Clerk webhook is properly configured
+- **Stripe Webhook Errors**: Check webhook secret is correct
+- **Database Connection**: Ensure using pooled connection URL
+- **Auth Issues**: Verify Clerk keys and domain configuration
+- **AI Features Not Working**: Check OpenAI API key and user tier

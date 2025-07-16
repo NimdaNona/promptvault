@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Copy, Edit, Trash2, GitBranch, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ShareDialog from "./share-dialog";
 import { toast } from "sonner";
 
 interface PromptCardProps {
@@ -116,6 +117,7 @@ export default function PromptCard({ prompt, onDelete }: PromptCardProps) {
           >
             <Copy className="w-4 h-4" />
           </Button>
+          <ShareDialog promptId={prompt.id} promptName={prompt.name} />
           <Button
             size="sm"
             variant="ghost"

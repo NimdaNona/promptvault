@@ -6,14 +6,19 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.25.1",
-    "@vercel/postgres": "^0.10.0",
+    "@neondatabase/serverless": "^1.0.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.44.3",
     "lucide-react": "^0.525.0",
+    "nanoid": "^5.1.5",
     "next": "15.4.1",
     "openai": "^5.9.2",
     "pg": "^8.16.3",

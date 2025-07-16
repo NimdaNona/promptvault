@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { Loader2, ArrowLeft, GitBranch, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import PromptOptimizer from "@/components/prompts/prompt-optimizer";
 import { toast } from "sonner";
 import Link from "next/link";
 
@@ -157,6 +158,14 @@ export default function EditPromptForm({ prompt }: EditPromptFormProps) {
                 Restored from version {selectedVersion.version}
               </p>
             )}
+            
+            {/* AI Optimizer */}
+            <div className="mt-4">
+              <PromptOptimizer 
+                prompt={currentContent}
+                onOptimize={(optimized) => setValue("content", optimized)}
+              />
+            </div>
           </div>
 
           {hasContentChanged && (
