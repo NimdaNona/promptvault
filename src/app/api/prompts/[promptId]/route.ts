@@ -206,13 +206,19 @@ export async function DELETE(
       await tx.delete(prompts).where(eq(prompts.id, promptId));
       
       // Update user's prompt count
-      await tx
-        .update(users)
-        .set({ 
-          promptCount: db.sql`${users.promptCount} - 1`,
-          updatedAt: new Date(),
-        })
-        .where(eq(users.id, userId));
+      const user = await tx.query.users.findFirst({
+        where: eq(users.id, userId),
+      });
+      
+      if (user) {
+        await tx
+          .update(users)
+          .set({ 
+            promptCount: Math.max(0, user.promptCount - 1),
+            updatedAt: new Date(),
+          })
+          .where(eq(users.id, userId));
+      }
     });
 
     return new Response("Prompt deleted", { status: 200 });

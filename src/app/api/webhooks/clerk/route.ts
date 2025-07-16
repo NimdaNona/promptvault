@@ -7,7 +7,7 @@ import { eq } from 'drizzle-orm';
 
 export async function POST(req: Request) {
   // Get the headers
-  const headerPayload = headers();
+  const headerPayload = await headers();
   const svix_id = headerPayload.get("svix-id");
   const svix_timestamp = headerPayload.get("svix-timestamp");
   const svix_signature = headerPayload.get("svix-signature");
@@ -77,7 +77,7 @@ export async function POST(req: Request) {
   }
 
   if (eventType === 'user.deleted') {
-    const { id } = evt.data;
+    const { id } = evt.data as { id: string };
     
     try {
       await db.delete(users).where(eq(users.id, id));

@@ -42,7 +42,15 @@ export default async function EditPromptPage({
 
   const formattedPrompt = {
     ...prompt,
+    description: prompt.description || undefined,
+    model: prompt.model || undefined,
+    folder: prompt.folder || undefined,
     tags: prompt.tags.map(pt => pt.tag),
+    versions: prompt.versions.map(v => ({
+      ...v,
+      changeMessage: v.changeMessage || undefined,
+      createdAt: v.createdAt.toISOString(),
+    })),
   };
 
   return (

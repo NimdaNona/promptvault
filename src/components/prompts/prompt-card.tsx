@@ -76,7 +76,7 @@ export default function PromptCard({ prompt, onDelete }: PromptCardProps) {
         </div>
         <div className="flex items-center gap-2">
           {prompt.isPublic && (
-            <Globe className="w-4 h-4 text-green-600" title="Public prompt" />
+            <Globe className="w-4 h-4 text-green-600" />
           )}
         </div>
       </div>
@@ -113,7 +113,6 @@ export default function PromptCard({ prompt, onDelete }: PromptCardProps) {
             size="sm"
             variant="ghost"
             onClick={handleCopy}
-            title="Copy prompt"
           >
             <Copy className="w-4 h-4" />
           </Button>
@@ -121,7 +120,6 @@ export default function PromptCard({ prompt, onDelete }: PromptCardProps) {
             size="sm"
             variant="ghost"
             onClick={handleEdit}
-            title="Edit prompt"
           >
             <Edit className="w-4 h-4" />
           </Button>
@@ -130,7 +128,6 @@ export default function PromptCard({ prompt, onDelete }: PromptCardProps) {
             variant="ghost"
             onClick={handleDelete}
             disabled={isDeleting}
-            title="Delete prompt"
           >
             <Trash2 className="w-4 h-4 text-red-600" />
           </Button>
