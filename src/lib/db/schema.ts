@@ -1,0 +1,176 @@
+import { pgTable, serial, text, timestamp, jsonb, integer, boolean, uuid, varchar, index, unique } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
+
+// Users table (managed by Clerk, but we keep a reference)
+export const users = pgTable('users', {
+  id: text('id').primaryKey(), // Clerk user ID
+  email: text('email').notNull().unique(),
+  name: text('name'),
+  tier: text('tier').notNull().default('free'), // free, pro, enterprise
+  promptCount: integer('prompt_count').notNull().default(0),
+  stripeCustomerId: text('stripe_customer_id'),
+  stripeSubscriptionId: text('stripe_subscription_id'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => {
+  return {
+    emailIdx: index('user_email_idx').on(table.email),
+  };
+});
+
+// Prompts table
+export const prompts = pgTable('prompts', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  description: text('description'),
+  content: text('content').notNull(),
+  model: text('model').default('gpt-4'), // gpt-4, claude, gemini, etc.
+  isPublic: boolean('is_public').notNull().default(false),
+  folder: text('folder'), // folder path like "marketing/social"
+  metadata: jsonb('metadata'), // additional data like temperature, max_tokens, etc.
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+}, (table) => {
+  return {
+    userIdIdx: index('prompt_user_id_idx').on(table.userId),
+    folderIdx: index('prompt_folder_idx').on(table.folder),
+    publicIdx: index('prompt_public_idx').on(table.isPublic),
+  };
+});
+
+// Prompt versions table (for version history)
+export const promptVersions = pgTable('prompt_versions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  promptId: uuid('prompt_id').notNull().references(() => prompts.id, { onDelete: 'cascade' }),
+  version: integer('version').notNull(),
+  content: text('content').notNull(),
+  metadata: jsonb('metadata'),
+  changeMessage: text('change_message'), // commit message
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  createdBy: text('created_by').notNull().references(() => users.id),
+}, (table) => {
+  return {
+    promptIdIdx: index('version_prompt_id_idx').on(table.promptId),
+    promptVersionUnique: unique('prompt_version_unique').on(table.promptId, table.version),
+  };
+});
+
+// Tags table
+export const tags = pgTable('tags', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  color: varchar('color', { length: 7 }).default('#3B82F6'), // hex color
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => {
+  return {
+    userTagUnique: unique('user_tag_unique').on(table.userId, table.name),
+  };
+});
+
+// Prompt-Tags junction table
+export const promptTags = pgTable('prompt_tags', {
+  promptId: uuid('prompt_id').notNull().references(() => prompts.id, { onDelete: 'cascade' }),
+  tagId: uuid('tag_id').notNull().references(() => tags.id, { onDelete: 'cascade' }),
+}, (table) => {
+  return {
+    promptTagPrimary: unique('prompt_tag_primary').on(table.promptId, table.tagId),
+  };
+});
+
+// Shares table (for sharing prompts)
+export const shares = pgTable('shares', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  promptId: uuid('prompt_id').notNull().references(() => prompts.id, { onDelete: 'cascade' }),
+  sharedBy: text('shared_by').notNull().references(() => users.id),
+  shareCode: text('share_code').notNull().unique(), // unique share link code
+  expiresAt: timestamp('expires_at'),
+  viewCount: integer('view_count').notNull().default(0),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => {
+  return {
+    shareCodeIdx: unique('share_code_idx').on(table.shareCode),
+  };
+});
+
+// Team invites (for pro/enterprise users)
+export const teamInvites = pgTable('team_invites', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  invitedBy: text('invited_by').notNull().references(() => users.id),
+  invitedEmail: text('invited_email').notNull(),
+  role: text('role').notNull().default('viewer'), // viewer, editor
+  accepted: boolean('accepted').notNull().default(false),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  expiresAt: timestamp('expires_at').notNull(),
+}, (table) => {
+  return {
+    invitedEmailIdx: index('invite_email_idx').on(table.invitedEmail),
+  };
+});
+
+// Relations
+export const usersRelations = relations(users, ({ many }) => ({
+  prompts: many(prompts),
+  tags: many(tags),
+  shares: many(shares),
+  invites: many(teamInvites),
+}));
+
+export const promptsRelations = relations(prompts, ({ one, many }) => ({
+  user: one(users, {
+    fields: [prompts.userId],
+    references: [users.id],
+  }),
+  versions: many(promptVersions),
+  tags: many(promptTags),
+  shares: many(shares),
+}));
+
+export const promptVersionsRelations = relations(promptVersions, ({ one }) => ({
+  prompt: one(prompts, {
+    fields: [promptVersions.promptId],
+    references: [prompts.id],
+  }),
+  createdBy: one(users, {
+    fields: [promptVersions.createdBy],
+    references: [users.id],
+  }),
+}));
+
+export const tagsRelations = relations(tags, ({ one, many }) => ({
+  user: one(users, {
+    fields: [tags.userId],
+    references: [users.id],
+  }),
+  prompts: many(promptTags),
+}));
+
+export const promptTagsRelations = relations(promptTags, ({ one }) => ({
+  prompt: one(prompts, {
+    fields: [promptTags.promptId],
+    references: [prompts.id],
+  }),
+  tag: one(tags, {
+    fields: [promptTags.tagId],
+    references: [tags.id],
+  }),
+}));
+
+export const sharesRelations = relations(shares, ({ one }) => ({
+  prompt: one(prompts, {
+    fields: [shares.promptId],
+    references: [prompts.id],
+  }),
+  sharedBy: one(users, {
+    fields: [shares.sharedBy],
+    references: [users.id],
+  }),
+}));
+
+export const teamInvitesRelations = relations(teamInvites, ({ one }) => ({
+  invitedBy: one(users, {
+    fields: [teamInvites.invitedBy],
+    references: [users.id],
+  }),
+}));
