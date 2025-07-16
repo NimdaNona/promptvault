@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, jsonb, integer, boolean, uuid, varchar, index, unique } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, timestamp, jsonb, integer, boolean, uuid, varchar, index, unique, real } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 // Users table (managed by Clerk, but we keep a reference)
@@ -109,12 +109,66 @@ export const teamInvites = pgTable('team_invites', {
   };
 });
 
+// Import sessions
+export const importSessions = pgTable('import_sessions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  source: text('source').notNull(), // 'chatgpt', 'claude', 'cline', 'cursor', 'gemini', 'file'
+  importedCount: integer('imported_count').default(0),
+  skippedCount: integer('skipped_count').default(0),
+  metadata: jsonb('metadata'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => {
+  return {
+    userIdIdx: index('import_sessions_user_id_idx').on(table.userId),
+    sourceIdx: index('import_sessions_source_idx').on(table.source),
+  };
+});
+
+// Prompt optimizations
+export const promptOptimizations = pgTable('prompt_optimizations', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  promptId: uuid('prompt_id').notNull().references(() => prompts.id, { onDelete: 'cascade' }),
+  originalContent: text('original_content').notNull(),
+  optimizedContent: text('optimized_content').notNull(),
+  improvements: jsonb('improvements'),
+  scoreBefore: real('score_before'),
+  scoreAfter: real('score_after'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => {
+  return {
+    promptIdIdx: index('prompt_optimizations_prompt_id_idx').on(table.promptId),
+  };
+});
+
+// Prompt templates
+export const promptTemplates = pgTable('prompt_templates', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  category: text('category').notNull(),
+  name: text('name').notNull(),
+  description: text('description'),
+  content: text('content').notNull(),
+  variables: jsonb('variables'),
+  usageCount: integer('usage_count').default(0),
+  rating: real('rating'),
+  isOfficial: boolean('is_official').default(false),
+  createdBy: text('created_by').references(() => users.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+}, (table) => {
+  return {
+    categoryIdx: index('prompt_templates_category_idx').on(table.category),
+    officialIdx: index('prompt_templates_official_idx').on(table.isOfficial),
+  };
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   prompts: many(prompts),
   tags: many(tags),
   shares: many(shares),
   invites: many(teamInvites),
+  importSessions: many(importSessions),
+  promptTemplates: many(promptTemplates),
 }));
 
 export const promptsRelations = relations(prompts, ({ one, many }) => ({
@@ -125,6 +179,7 @@ export const promptsRelations = relations(prompts, ({ one, many }) => ({
   versions: many(promptVersions),
   tags: many(promptTags),
   shares: many(shares),
+  optimizations: many(promptOptimizations),
 }));
 
 export const promptVersionsRelations = relations(promptVersions, ({ one }) => ({
@@ -171,6 +226,27 @@ export const sharesRelations = relations(shares, ({ one }) => ({
 export const teamInvitesRelations = relations(teamInvites, ({ one }) => ({
   invitedBy: one(users, {
     fields: [teamInvites.invitedBy],
+    references: [users.id],
+  }),
+}));
+
+export const importSessionsRelations = relations(importSessions, ({ one }) => ({
+  user: one(users, {
+    fields: [importSessions.userId],
+    references: [users.id],
+  }),
+}));
+
+export const promptOptimizationsRelations = relations(promptOptimizations, ({ one }) => ({
+  prompt: one(prompts, {
+    fields: [promptOptimizations.promptId],
+    references: [prompts.id],
+  }),
+}));
+
+export const promptTemplatesRelations = relations(promptTemplates, ({ one }) => ({
+  createdBy: one(users, {
+    fields: [promptTemplates.createdBy],
     references: [users.id],
   }),
 }));
