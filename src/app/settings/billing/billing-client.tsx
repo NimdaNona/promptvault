@@ -264,13 +264,13 @@ export default function BillingClient({ currentTier, hasSubscription, promptCoun
           <div>
             <h3 className="font-medium mb-1">Can I cancel anytime?</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Yes, you can cancel your subscription at any time. You'll continue to have access until the end of your billing period.
+              Yes, you can cancel your subscription at any time. You&apos;ll continue to have access until the end of your billing period.
             </p>
           </div>
           <div>
             <h3 className="font-medium mb-1">What happens to my prompts if I downgrade?</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Your prompts remain safe. If you exceed the free tier limit, you won't be able to create new prompts until you upgrade or delete some existing ones.
+              Your prompts remain safe. If you exceed the free tier limit, you won&apos;t be able to create new prompts until you upgrade or delete some existing ones.
             </p>
           </div>
           <div>

@@ -227,8 +227,8 @@ export default function ClaudeImportDialog({ onClose, onImport, existingPrompts 
                         <li>Open <a href="https://claude.ai" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">claude.ai</a> in your browser</li>
                         <li>Click on your name in the sidebar</li>
                         <li>Go to Settings → Account</li>
-                        <li>Click "Export your data"</li>
-                        <li>You'll receive an email with a download link</li>
+                        <li>Click &quot;Export your data&quot;</li>
+                        <li>You&apos;ll receive an email with a download link</li>
                         <li>Download and extract the ZIP file</li>
                         <li>Upload the data export JSON file below</li>
                       </ol>
@@ -284,7 +284,7 @@ export default function ClaudeImportDialog({ onClose, onImport, existingPrompts 
                           <div className="flex items-start space-x-2">
                             <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-400 mt-0.5" />
                             <p className="text-xs text-yellow-800 dark:text-yellow-200">
-                              JSONL files can be large. We'll extract only your prompts, not Claude's responses.
+                              JSONL files can be large. We&apos;ll extract only your prompts, not Claude&apos;s responses.
                             </p>
                           </div>
                         </div>

@@ -1,0 +1,72 @@
+[16:15:25.868] Running build in Washington, D.C., USA (East) – iad1
+[16:15:25.869] Build machine configuration: 4 cores, 8 GB
+[16:15:25.885] Cloning github.com/NimdaNona/promptvault (Branch: main, Commit: e9d8c65)
+[16:15:26.193] Cloning completed: 308.000ms
+[16:15:28.952] Restored build cache from previous deployment (AxizgyUgAtT52HP2ZUmFU45BYMai)
+[16:15:31.002] Running "vercel build"
+[16:15:31.553] Vercel CLI 44.4.3
+[16:15:31.876] Installing dependencies...
+[16:15:33.370] 
+[16:15:33.370] up to date in 1s
+[16:15:33.370] 
+[16:15:33.371] 185 packages are looking for funding
+[16:15:33.371]   run `npm fund` for details
+[16:15:33.402] Detected Next.js version: 15.4.1
+[16:15:33.408] Running "npm run build"
+[16:15:33.523] 
+[16:15:33.523] > promptvault@0.1.0 build
+[16:15:33.523] > next build
+[16:15:33.523] 
+[16:15:34.752]    ▲ Next.js 15.4.1
+[16:15:34.753] 
+[16:15:34.789]    Creating an optimized production build ...
+[16:15:51.312] <w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (150kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+[16:15:57.962]  ✓ Compiled successfully in 19.0s
+[16:15:57.967]    Linting and checking validity of types ...
+[16:16:01.695] 
+[16:16:01.696] Failed to compile.
+[16:16:01.696] 
+[16:16:01.696] ./src/app/dashboard/dashboard-client.tsx
+[16:16:01.696] 46:6  Warning: React Hook useEffect has a missing dependency: 'fetchPrompts'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+[16:16:01.696] 196:18  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+[16:16:01.696] 
+[16:16:01.696] ./src/app/onboarding/onboarding-wizard.tsx
+[16:16:01.696] 157:20  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+[16:16:01.696] 
+[16:16:01.696] ./src/app/settings/billing/billing-client.tsx
+[16:16:01.697] 267:69  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+[16:16:01.697] 273:83  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+[16:16:01.697] 
+[16:16:01.697] ./src/components/import-dialog/claude-import-dialog.tsx
+[16:16:01.697] 230:35  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+[16:16:01.697] 230:52  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+[16:16:01.697] 231:32  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+[16:16:01.697] 287:59  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+[16:16:01.697] 287:100  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+[16:16:01.697] 
+[16:16:01.697] ./src/components/import-dialog/cline-import-dialog.tsx
+[16:16:01.697] 207:38  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+[16:16:01.697] 207:46  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+[16:16:01.698] 237:114  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+[16:16:01.698] 247:64  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+[16:16:01.698] 
+[16:16:01.698] ./src/components/import-dialog/file-import-dialog.tsx
+[16:16:01.698] 143:74  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+[16:16:01.698] 143:79  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+[16:16:01.698] 143:85  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+[16:16:01.698] 143:93  Error: `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`.  react/no-unescaped-entities
+[16:16:01.698] 
+[16:16:01.698] ./src/components/import-dialog/gemini-import-dialog.tsx
+[16:16:01.698] 158:32  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+[16:16:01.698] 158:51  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+[16:16:01.698] 176:32  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+[16:16:01.699] 176:47  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+[16:16:01.699] 
+[16:16:01.699] ./src/components/prompts/share-dialog.tsx
+[16:16:01.699] 89:62  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+[16:16:01.699] 89:75  Error: `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`.  react/no-unescaped-entities
+[16:16:01.699] 
+[16:16:01.699] info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+[16:16:01.728] Error: Command "npm run build" exited with 1
+[16:16:02.084] 
+[16:16:05.060] Exiting build container

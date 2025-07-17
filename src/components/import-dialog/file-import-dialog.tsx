@@ -140,7 +140,7 @@ export default function FileImportDialog({ onClose, onImport, existingPrompts = 
                       Supported file formats:
                     </p>
                     <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
-                      <li>• <strong>JSON</strong>: Array of prompts with 'name' and 'content' fields</li>
+                      <li>• <strong>JSON</strong>: Array of prompts with &apos;name&apos; and &apos;content&apos; fields</li>
                       <li>• <strong>TXT/MD</strong>: Prompts separated by double newlines</li>
                     </ul>
                   </div>

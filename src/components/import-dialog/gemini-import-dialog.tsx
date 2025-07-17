@@ -155,7 +155,7 @@ export default function GeminiImportDialog({ onClose, onImport, existingPrompts 
                   <ol className="text-sm text-gray-600 dark:text-gray-400 space-y-2 list-decimal list-inside">
                     <li>Open the Gemini conversation you want to share</li>
                     <li>Click the share icon <Share2 className="w-4 h-4 inline" /> in the conversation</li>
-                    <li>Select "Share conversation" to generate a link</li>
+                    <li>Select &quot;Share conversation&quot; to generate a link</li>
                     <li>Copy the generated share link</li>
                   </ol>
                 </div>
@@ -173,7 +173,7 @@ export default function GeminiImportDialog({ onClose, onImport, existingPrompts 
                   <ol className="text-sm text-gray-600 dark:text-gray-400 space-y-2 list-decimal list-inside">
                     <li>Open your Gemini conversation</li>
                     <li>Click the export icon <Download className="w-4 h-4 inline" /></li>
-                    <li>Select "Export to Docs"</li>
+                    <li>Select &quot;Export to Docs&quot;</li>
                     <li>Download the Google Doc as a text file</li>
                     <li>Upload the file below</li>
                   </ol>

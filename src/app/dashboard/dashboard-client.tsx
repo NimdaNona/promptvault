@@ -43,6 +43,7 @@ export default function DashboardClient({ analytics }: DashboardClientProps) {
 
   useEffect(() => {
     fetchPrompts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, selectedFolder]);
 
   const fetchPrompts = async () => {
@@ -193,7 +194,7 @@ export default function DashboardClient({ analytics }: DashboardClientProps) {
           <div className="flex items-center">
             <TrendingUp className="w-5 h-5 text-blue-600 mr-2" />
             <p className="text-sm text-blue-800 dark:text-blue-200">
-              You've created {analytics.recentActivity} version{analytics.recentActivity !== 1 ? 's' : ''} in the past 7 days. Keep up the great work!
+              You&apos;ve created {analytics.recentActivity} version{analytics.recentActivity !== 1 ? 's' : ''} in the past 7 days. Keep up the great work!
             </p>
           </div>
         </div>

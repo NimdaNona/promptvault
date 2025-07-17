@@ -154,7 +154,7 @@ export default function OnboardingWizard({ userId, email, name }: OnboardingWiza
                 Welcome to PromptVault Pro
               </h2>
               <p className="text-gray-600 dark:text-gray-400">
-                Let's personalize your experience
+                Let&apos;s personalize your experience
               </p>
             </div>
 

@@ -204,7 +204,7 @@ export default function ClineImportDialog({ onClose, onImport, existingPrompts =
                     <li className="flex items-start">
                       <span className="font-semibold mr-2 mt-0.5">2.</span>
                       <div>
-                        <p>Click the "History" button at the top of the Cline panel</p>
+                        <p>Click the &quot;History&quot; button at the top of the Cline panel</p>
                       </div>
                     </li>
                     <li className="flex items-start">
@@ -234,7 +234,7 @@ export default function ClineImportDialog({ onClose, onImport, existingPrompts =
                     <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 mr-3 flex-shrink-0" />
                     <div className="text-sm text-amber-800 dark:text-amber-200">
                       <p className="font-semibold mb-1">Multi-file Upload Supported</p>
-                      <p>Cline exports tasks individually, but you can upload multiple markdown files at once. We'll extract and organize all your prompts automatically.</p>
+                      <p>Cline exports tasks individually, but you can upload multiple markdown files at once. We&apos;ll extract and organize all your prompts automatically.</p>
                     </div>
                   </div>
                 </div>
@@ -244,7 +244,7 @@ export default function ClineImportDialog({ onClose, onImport, existingPrompts =
                   <div className="flex items-start">
                     <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 mr-3 flex-shrink-0" />
                     <div className="text-sm text-blue-800 dark:text-blue-200">
-                      <p className="font-semibold mb-1">What we'll import:</p>
+                      <p className="font-semibold mb-1">What we&apos;ll import:</p>
                       <ul className="list-disc list-inside space-y-1 ml-2">
                         <li>All user prompts from conversations</li>
                         <li>Task titles and timestamps</li>

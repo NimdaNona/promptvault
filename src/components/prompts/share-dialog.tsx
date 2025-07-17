@@ -86,7 +86,7 @@ export default function ShareDialog({ promptId, promptName }: ShareDialogProps) 
               <X className="w-5 h-5" />
             </button>
 
-            <h2 className="text-xl font-semibold mb-4">Share "{promptName}"</h2>
+            <h2 className="text-xl font-semibold mb-4">Share &quot;{promptName}&quot;</h2>
 
             {/* Expiration Options */}
             <div className="mb-4">
