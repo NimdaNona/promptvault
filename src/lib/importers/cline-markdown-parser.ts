@@ -392,7 +392,7 @@ export class ClineMarkdownParser {
           : null;
         
         const prompt: ExtractedPrompt = {
-          name: task.title || `Cline Prompt ${index + 1}`,
+          title: task.title || `Cline Prompt ${index + 1}`,
           content: message.content,
           metadata: {
             source: 'cline',

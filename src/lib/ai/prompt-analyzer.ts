@@ -68,7 +68,7 @@ Return JSON with this structure:
 
 Content: ${prompt.content.substring(0, 1000)}${prompt.content.length > 1000 ? '...' : ''}
 
-Task context: ${prompt.metadata.conversationTitle}
+Task context: ${prompt.metadata.conversationTitle || 'Unknown'}
 First line: ${context.firstLine}
 Content length: ${context.length} characters
 Has code blocks: ${context.codeBlocks.length > 0}
@@ -213,7 +213,7 @@ function generateDefaultName(
   
   // Fall back to task name + index
   const taskName = prompt.metadata.conversationTitle || 'Cline Task';
-  const index = prompt.metadata.messageIndex || 0;
+  const index = (prompt.metadata as any).messageIndex || 0;
   
   return `${taskName} - Prompt ${index + 1}`;
 }

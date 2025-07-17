@@ -125,7 +125,7 @@ export async function processImportBatch(
           );
           
           const promptName = sanitizePromptName(
-            aiAnalysis?.suggestedName || prompt.name
+            aiAnalysis?.suggestedName || prompt.title
           );
           
           const promptFolder = options.targetFolder || 
@@ -178,7 +178,7 @@ export async function processImportBatch(
           importProgress.incrementProcessed(sessionId, false);
           importProgress.addError(
             sessionId,
-            `Failed to import prompt "${prompt.name}": ${error instanceof Error ? error.message : 'Unknown error'}`
+            `Failed to import prompt "${prompt.title}": ${error instanceof Error ? error.message : 'Unknown error'}`
           );
           
           return {
@@ -217,7 +217,7 @@ function createEmptyProcessedPrompt(
 ): ProcessedPrompt {
   return {
     id: '',
-    name: prompt.name,
+    name: prompt.title,
     content: prompt.content,
     folder: '',
     tags: [],

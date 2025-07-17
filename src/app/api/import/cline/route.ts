@@ -18,7 +18,7 @@ const ClineImportSchema = z.object({
   })).min(1).max(50), // Limit to 50 files
   options: z.object({
     targetFolder: z.string().optional(),
-    tags: z.array(z.string()).optional(),
+    defaultTags: z.array(z.string()).optional(),
     skipAI: z.boolean().optional(),
   }).optional(),
 });
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
         session.id,
         {
           targetFolder: options.targetFolder,
-          defaultTags: options.tags,
+          defaultTags: options.defaultTags,
           skipAI: options.skipAI,
           onProgress: (progress) => {
             importProgress.updateProgress(session.id, {

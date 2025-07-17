@@ -7,14 +7,16 @@ import { parseCursorExport, validateCursorExport } from './cursor';
 export type ImportSource = 'chatgpt' | 'claude' | 'gemini' | 'cline' | 'cursor' | 'file';
 
 export interface ExtractedPrompt {
-  name: string;
+  title: string;
   content: string;
+  response?: string;
   metadata: {
     source: ImportSource;
-    conversationId: string;
-    conversationTitle: string;
-    timestamp: number;
+    conversationId?: string;
+    conversationTitle?: string;
+    timestamp?: number;
     model?: string;
+    [key: string]: any;
   };
 }
 
@@ -104,7 +106,7 @@ export class PromptImporter {
             const jsonData = JSON.parse(content);
             if (Array.isArray(jsonData)) {
               prompts = jsonData.map((item, index) => ({
-                name: item.name || item.title || `Prompt ${index + 1}`,
+                title: item.name || item.title || `Prompt ${index + 1}`,
                 content: item.content || item.prompt || item.text || JSON.stringify(item),
                 metadata: {
                   source: 'file' as const,
@@ -116,7 +118,7 @@ export class PromptImporter {
             } else if (typeof jsonData === 'object') {
               // Single prompt object
               prompts = [{
-                name: jsonData.name || jsonData.title || file.name.replace(/\.[^/.]+$/, ''),
+                title: jsonData.name || jsonData.title || file.name.replace(/\.[^/.]+$/, ''),
                 content: jsonData.content || jsonData.prompt || jsonData.text || JSON.stringify(jsonData),
                 metadata: {
                   source: 'file' as const,
@@ -135,12 +137,12 @@ export class PromptImporter {
               
               prompts = promptTexts.map((text, index) => {
                 const firstLine = text.trim().split('\n')[0];
-                const name = firstLine.length > 50 
+                const title = firstLine.length > 50 
                   ? firstLine.substring(0, 50) + '...' 
                   : firstLine;
                 
                 return {
-                  name: name || `Prompt ${index + 1}`,
+                  title: title || `Prompt ${index + 1}`,
                   content: text.trim(),
                   metadata: {
                     source: 'file' as const,

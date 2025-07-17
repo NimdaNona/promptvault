@@ -9,7 +9,10 @@ export interface ImportOptions {
   skipDuplicates?: boolean;
   autoCategize?: boolean;
   targetFolder?: string;
+  defaultTags?: string[];
+  skipAI?: boolean;
   batchSize?: number;
+  onProgress?: (progress: number) => void;
 }
 
 export interface ImportedPrompt {
@@ -63,7 +66,15 @@ export async function createImportSession(
     createdAt: new Date()
   }).returning();
   
-  return session;
+  return {
+    id: session.id,
+    userId: session.userId,
+    source: session.source as ImportSource,
+    importedCount: session.importedCount || 0,
+    skippedCount: session.skippedCount || 0,
+    metadata: session.metadata,
+    createdAt: session.createdAt
+  };
 }
 
 // Update import session with results

@@ -56,7 +56,7 @@ export function parseCursorExport(jsonContent: string): ExtractedPrompt[] {
             : firstLine;
 
           prompts.push({
-            name: name || session.title || 'Cursor Prompt',
+            title: name || session.title || 'Cursor Prompt',
             content: message.content,
             metadata: {
               source: 'cursor',

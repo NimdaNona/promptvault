@@ -64,7 +64,7 @@ export function parseChatGPTExport(jsonContent: string): ExtractedPrompt[] {
                 : firstLine;
 
               prompts.push({
-                name: name || conversation.title || 'Untitled Prompt',
+                title: name || conversation.title || 'Untitled Prompt',
                 content: content,
                 metadata: {
                   source: 'chatgpt',

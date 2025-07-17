@@ -48,7 +48,7 @@ export function parseGeminiDocsExport(textContent: string): ExtractedPrompt[] {
           : firstLine;
 
         prompts.push({
-          name: name || 'Gemini Prompt',
+          title: name || 'Gemini Prompt',
           content: content,
           metadata: {
             source: 'gemini',
@@ -85,7 +85,7 @@ export function parseGeminiExport(jsonContent: string): ExtractedPrompt[] {
             : firstLine;
 
           prompts.push({
-            name: name || conversation.title || 'Gemini Prompt',
+            title: name || conversation.title || 'Gemini Prompt',
             content: message.content,
             metadata: {
               source: 'gemini',

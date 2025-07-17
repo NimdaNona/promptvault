@@ -49,7 +49,7 @@ export function parseClaudeExport(jsonContent: string): ExtractedPrompt[] {
             : firstLine;
 
           prompts.push({
-            name: name || conversation.name || 'Untitled Prompt',
+            title: name || conversation.name || 'Untitled Prompt',
             content: message.text,
             metadata: {
               source: 'claude',
@@ -103,7 +103,7 @@ export function parseClaudeCodeJSONL(jsonlContent: string): ExtractedPrompt[] {
             : firstLine;
 
           prompts.push({
-            name: name || 'Claude Code Prompt',
+            title: name || 'Claude Code Prompt',
             content: content,
             metadata: {
               source: 'claude',
