@@ -26,7 +26,24 @@ export default function ClineImportDialog({ onClose, onImport, existingPrompts =
     setImportResult(null);
 
     try {
-      const result = await PromptImporter.importFromFile(file, 'cline');
+      // Upload file first
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const uploadResponse = await fetch('/api/import/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload file');
+      }
+
+      const { content } = await uploadResponse.json();
+
+      // Process with importer
+      const tempFile = new File([content], file.name, { type: file.type });
+      const result = await PromptImporter.importFromFile(tempFile, 'cline');
       
       if (result.errors.length > 0) {
         result.errors.forEach(error => toast.error(error));
