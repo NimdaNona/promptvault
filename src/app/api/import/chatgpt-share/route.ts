@@ -1,7 +1,55 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { z } from 'zod';
 
 export const runtime = 'edge';
+
+const requestSchema = z.object({
+  shareLink: z.string().optional(),
+  conversationText: z.string().optional(),
+}).refine(data => data.shareLink || data.conversationText, {
+  message: "Either shareLink or conversationText must be provided"
+});
+
+interface ParsedPrompt {
+  id: string;
+  text: string;
+  timestamp?: string;
+  order: number;
+}
+
+function parseConversationText(text: string): ParsedPrompt[] {
+  const prompts: ParsedPrompt[] = [];
+  
+  // Split conversation into sections
+  const sections = text.split(/\n\n+/);
+  let order = 0;
+  
+  for (let i = 0; i < sections.length; i++) {
+    const section = sections[i].trim();
+    if (!section) continue;
+    
+    // Check if this section starts with a user indicator
+    if (section.startsWith('You:') || 
+        section.startsWith('User:') || 
+        section.startsWith('Human:')) {
+      
+      // Extract the prompt text
+      const promptText = section.replace(/^(You:|User:|Human:)\s*/i, '').trim();
+      
+      if (promptText) {
+        prompts.push({
+          id: `chatgpt-${Date.now()}-${order}`,
+          text: promptText,
+          timestamp: new Date().toISOString(),
+          order: order++
+        });
+      }
+    }
+  }
+  
+  return prompts;
+}
 
 export async function POST(req: Request) {
   try {
@@ -11,40 +59,43 @@ export async function POST(req: Request) {
       return new Response("Unauthorized", { status: 401 });
     }
 
-    const { shareLink } = await req.json();
+    const body = await req.json();
+    const validatedData = requestSchema.parse(body);
 
-    if (!shareLink || typeof shareLink !== 'string') {
-      return NextResponse.json({ error: "Invalid share link" }, { status: 400 });
+    // If conversation text is provided, parse it
+    if (validatedData.conversationText) {
+      const prompts = parseConversationText(validatedData.conversationText);
+      
+      return NextResponse.json({
+        success: true,
+        prompts: prompts,
+        count: prompts.length
+      });
     }
 
-    // Extract conversation ID
-    const match = shareLink.match(/share\/([a-zA-Z0-9-]+)/);
-    if (!match) {
-      return NextResponse.json({ error: "Invalid ChatGPT share link format" }, { status: 400 });
+    // If only a share link is provided, return instructions
+    if (validatedData.shareLink) {
+      // Extract conversation ID
+      const match = validatedData.shareLink.match(/share\/([a-zA-Z0-9-]+)/);
+      const conversationId = match ? match[1] : null;
+      
+      return NextResponse.json({
+        success: false,
+        requiresManualCopy: true,
+        conversationId,
+        instructions: "Please visit the ChatGPT share link and copy the entire conversation text, then paste it here.",
+        shareLink: validatedData.shareLink
+      });
     }
 
-    const conversationId = match[1];
-
-    // For now, we'll create a placeholder that tells users to export manually
-    // In a production app, you'd use puppeteer or playwright to scrape the conversation
-    // or use an unofficial API if available
-    
-    return NextResponse.json({
-      success: false,
-      message: "Share link import requires manual export for now. Please use the Export tab to upload your ChatGPT data.",
-      conversationId,
-      instructions: [
-        "1. Open the ChatGPT share link in your browser",
-        "2. Click on your profile picture in the bottom left",
-        "3. Select 'Settings & Beta'",
-        "4. Go to 'Data controls'",
-        "5. Click 'Export data'",
-        "6. Download and extract the ZIP file",
-        "7. Upload the conversations.json file using the Export tab"
-      ]
-    });
+    return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
   } catch (error) {
     console.error("ChatGPT share link error:", error);
+    
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ error: error.errors }, { status: 400 });
+    }
+    
     return NextResponse.json(
       { error: "Failed to process share link" },
       { status: 500 }

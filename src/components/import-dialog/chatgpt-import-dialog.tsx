@@ -16,9 +16,74 @@ interface ChatGPTImportDialogProps {
 export default function ChatGPTImportDialog({ onClose, onImport, existingPrompts = [] }: ChatGPTImportDialogProps) {
   const [activeTab, setActiveTab] = useState<'share' | 'export'>('share');
   const [shareLink, setShareLink] = useState('');
+  const [conversationText, setConversationText] = useState('');
+  const [showPasteDialog, setShowPasteDialog] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [importResult, setImportResult] = useState<any>(null);
   const [selectedPrompts, setSelectedPrompts] = useState<Set<number>>(new Set());
+
+  const handleConversationText = async () => {
+    if (!conversationText.trim()) {
+      toast.error('Please paste the conversation text');
+      return;
+    }
+
+    setIsImporting(true);
+    try {
+      const response = await fetch('/api/import/chatgpt-share', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ conversationText }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to process conversation');
+      }
+
+      if (data.success && data.prompts) {
+        // Format prompts to match ExtractedPrompt interface
+        const formattedPrompts = data.prompts.map((prompt: any) => ({
+          name: prompt.text.slice(0, 50) + (prompt.text.length > 50 ? '...' : ''),
+          content: prompt.text,
+          metadata: {
+            source: 'chatgpt' as const,
+            conversationId: `share-${Date.now()}`,
+            conversationTitle: 'Imported from Share Link',
+            timestamp: new Date(prompt.timestamp || Date.now()).getTime(),
+            model: 'gpt-4'
+          }
+        }));
+        
+        // Process the extracted prompts
+        const { unique, duplicates } = PromptImporter.detectDuplicates(formattedPrompts, existingPrompts);
+        
+        // Pre-select all unique prompts
+        const preSelected = new Set(unique.map((_, index) => index));
+        setSelectedPrompts(preSelected);
+        
+        setImportResult({
+          all: formattedPrompts,
+          unique,
+          duplicates,
+        });
+        
+        setShowPasteDialog(false);
+        setConversationText('');
+        toast.success(`Found ${data.prompts.length} prompts from ChatGPT`);
+      } else {
+        toast.error('No prompts found in the conversation');
+      }
+    } catch (error) {
+      console.error('Conversation text error:', error);
+      toast.error('Failed to process conversation text');
+    } finally {
+      setIsImporting(false);
+    }
+  };
 
   const handleShareLink = async () => {
     if (!shareLink.trim()) {
@@ -48,16 +113,42 @@ export default function ChatGPTImportDialog({ onClose, onImport, existingPrompts
         throw new Error(data.error || 'Failed to process share link');
       }
 
-      if (!data.success) {
-        // Show instructions for manual export
-        toast.info(data.message);
-        setActiveTab('export');
+      if (!data.success && data.requiresManualCopy) {
+        // Show paste dialog for manual copy
+        setShowPasteDialog(true);
+        toast.info('Please copy the conversation text from ChatGPT');
+      } else if (data.success && data.prompts) {
+        // Format prompts to match ExtractedPrompt interface
+        const formattedPrompts = data.prompts.map((prompt: any) => ({
+          name: prompt.text.slice(0, 50) + (prompt.text.length > 50 ? '...' : ''),
+          content: prompt.text,
+          metadata: {
+            source: 'chatgpt' as const,
+            conversationId: data.conversationId || `share-${Date.now()}`,
+            conversationTitle: 'Imported from Share Link',
+            timestamp: new Date(prompt.timestamp || Date.now()).getTime(),
+            model: 'gpt-4'
+          }
+        }));
         
-        // You could also show a modal with detailed instructions
-        console.log('Instructions:', data.instructions);
+        // Process the extracted prompts
+        const { unique, duplicates } = PromptImporter.detectDuplicates(formattedPrompts, existingPrompts);
+        
+        // Pre-select all unique prompts
+        const preSelected = new Set(unique.map((_, index) => index));
+        setSelectedPrompts(preSelected);
+        
+        setImportResult({
+          all: formattedPrompts,
+          unique,
+          duplicates,
+        });
+        
+        toast.success(`Found ${data.prompts.length} prompts from ChatGPT`);
       } else {
-        // In the future, this would process the scraped conversation
-        toast.success('Share link processed successfully');
+        // Fallback to export tab
+        toast.info(data.message || 'Please use the export method');
+        setActiveTab('export');
       }
     } catch (error) {
       console.error('Share link error:', error);
@@ -282,11 +373,6 @@ export default function ChatGPTImportDialog({ onClose, onImport, existingPrompts
               <div className="p-6">
                 {activeTab === 'share' ? (
                   <div className="space-y-6">
-                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                      <p className="text-sm text-blue-800 dark:text-blue-200">
-                        Note: Share link import is coming soon. For now, please use the Export method.
-                      </p>
-                    </div>
 
                     <div>
                       <h3 className="font-medium mb-4">How to share a ChatGPT conversation:</h3>
@@ -299,7 +385,7 @@ export default function ChatGPTImportDialog({ onClose, onImport, existingPrompts
                             <ol className="text-sm text-gray-600 dark:text-gray-400 space-y-1 list-decimal list-inside">
                               <li>Open the ChatGPT conversation you want to share</li>
                               <li>Click the share icon in the top right</li>
-                              <li>Click "Share Link" to generate a public link</li>
+                              <li>Click &quot;Share Link&quot; to generate a public link</li>
                               <li>Copy the link and paste it below</li>
                             </ol>
                           </div>
@@ -312,7 +398,7 @@ export default function ChatGPTImportDialog({ onClose, onImport, existingPrompts
                             <ol className="text-sm text-gray-600 dark:text-gray-400 space-y-1 list-decimal list-inside">
                               <li>Open the ChatGPT app</li>
                               <li>Long press on the conversation</li>
-                              <li>Tap "Share" and then "Share Link"</li>
+                              <li>Tap &quot;Share&quot; and then &quot;Share Link&quot;</li>
                               <li>Copy the link and paste it below</li>
                             </ol>
                           </div>
@@ -353,8 +439,8 @@ export default function ChatGPTImportDialog({ onClose, onImport, existingPrompts
                         <li>Go to <a href="https://chatgpt.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">chatgpt.com</a></li>
                         <li>Click on your profile picture → Settings</li>
                         <li>Go to Data Controls → Export data</li>
-                        <li>Click "Export" and confirm</li>
-                        <li>You'll receive an email with a download link (may take a few minutes)</li>
+                        <li>Click &quot;Export&quot; and confirm</li>
+                        <li>You&apos;ll receive an email with a download link (may take a few minutes)</li>
                         <li>Download and extract the ZIP file</li>
                         <li>Upload the <code className="bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded">conversations.json</code> file below</li>
                       </ol>
@@ -499,6 +585,88 @@ export default function ChatGPTImportDialog({ onClose, onImport, existingPrompts
           </div>
         )}
       </motion.div>
+
+      {/* Paste Conversation Dialog */}
+      <AnimatePresence>
+        {showPasteDialog && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-[60]">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col"
+            >
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Paste ChatGPT Conversation</h3>
+                <button
+                  onClick={() => {
+                    setShowPasteDialog(false);
+                    setConversationText('');
+                  }}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="flex-1 p-6 overflow-y-auto">
+                <div className="space-y-4">
+                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                    <p className="text-sm text-blue-800 dark:text-blue-200">
+                      1. Open the ChatGPT share link: <a href={shareLink} target="_blank" rel="noopener noreferrer" className="underline">{shareLink}</a>
+                    </p>
+                    <p className="text-sm text-blue-800 dark:text-blue-200 mt-2">
+                      2. Select all text on the page (Ctrl+A or Cmd+A)
+                    </p>
+                    <p className="text-sm text-blue-800 dark:text-blue-200 mt-2">
+                      3. Copy the text (Ctrl+C or Cmd+C)
+                    </p>
+                    <p className="text-sm text-blue-800 dark:text-blue-200 mt-2">
+                      4. Paste it in the text area below
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Conversation Text</label>
+                    <textarea
+                      value={conversationText}
+                      onChange={(e) => setConversationText(e.target.value)}
+                      placeholder="Paste the entire ChatGPT conversation here..."
+                      className="w-full h-64 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 resize-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <button
+                  onClick={() => {
+                    setShowPasteDialog(false);
+                    setConversationText('');
+                  }}
+                  className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConversationText}
+                  disabled={isImporting || !conversationText.trim()}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                >
+                  {isImporting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Processing...</span>
+                    </>
+                  ) : (
+                    <span>Extract Prompts</span>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
