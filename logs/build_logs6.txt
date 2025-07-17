@@ -1,0 +1,41 @@
+[16:35:33.646] Running build in Washington, D.C., USA (East) – iad1
+[16:35:33.646] Build machine configuration: 4 cores, 8 GB
+[16:35:33.660] Cloning github.com/NimdaNona/promptvault (Branch: main, Commit: 40cc8f0)
+[16:35:33.988] Cloning completed: 328.000ms
+[16:35:36.887] Restored build cache from previous deployment (AxizgyUgAtT52HP2ZUmFU45BYMai)
+[16:35:39.596] Running "vercel build"
+[16:35:40.148] Vercel CLI 44.4.3
+[16:35:40.458] Installing dependencies...
+[16:35:42.038] 
+[16:35:42.038] up to date in 1s
+[16:35:42.038] 
+[16:35:42.039] 185 packages are looking for funding
+[16:35:42.039]   run `npm fund` for details
+[16:35:42.072] Detected Next.js version: 15.4.1
+[16:35:42.079] Running "npm run build"
+[16:35:42.196] 
+[16:35:42.196] > promptvault@0.1.0 build
+[16:35:42.196] > next build
+[16:35:42.197] 
+[16:35:43.411]    ▲ Next.js 15.4.1
+[16:35:43.411] 
+[16:35:43.445]    Creating an optimized production build ...
+[16:35:57.808] <w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (150kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+[16:36:04.330]  ✓ Compiled successfully in 17.0s
+[16:36:04.335]    Linting and checking validity of types ...
+[16:36:14.285] Failed to compile.
+[16:36:14.285] 
+[16:36:14.285] ./src/app/api/import/cline/route.ts:109:11
+[16:36:14.285] Type error: Object literal may only specify known properties, and 'folderId' does not exist in type 'ImportOptions'.
+[16:36:14.285] 
+[16:36:14.286] [0m [90m 107 |[39m         session[33m.[39mid[33m,[39m
+[16:36:14.286]  [90m 108 |[39m         {
+[16:36:14.286] [31m[1m>[22m[39m[90m 109 |[39m           folderId[33m:[39m options[33m.[39mfolderId[33m,[39m
+[16:36:14.286]  [90m     |[39m           [31m[1m^[22m[39m
+[16:36:14.286]  [90m 110 |[39m           defaultTags[33m:[39m options[33m.[39mtags[33m,[39m
+[16:36:14.286]  [90m 111 |[39m           skipAI[33m:[39m options[33m.[39mskipAI[33m,[39m
+[16:36:14.286]  [90m 112 |[39m           onProgress[33m:[39m (progress) [33m=>[39m {[0m
+[16:36:14.324] Next.js build worker exited with code: 1 and signal: null
+[16:36:14.349] Error: Command "npm run build" exited with 1
+[16:36:14.735] 
+[16:36:17.876] Exiting build container

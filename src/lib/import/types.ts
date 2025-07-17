@@ -27,7 +27,7 @@ export interface ImportResults {
 export interface ImportOptions {
   skipDuplicates?: boolean;
   autoCategize?: boolean;
-  folderId?: string;
+  targetFolder?: string;
   defaultTags?: string[];
   skipAI?: boolean;
   batchSize?: number;
@@ -51,7 +51,7 @@ export interface ProcessedPrompt {
   title: string;
   content: string;
   category?: string;
-  folderId?: string;
+  targetFolder?: string;
   tags: string[];
   metadata: any;
 }
