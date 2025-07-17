@@ -1,108 +1,29 @@
 import type { ExtractedPrompt } from './index';
+import { ClineMarkdownParser } from './cline-markdown-parser';
 
-export interface ClineMessage {
-  ts: number;
-  type: 'ask' | 'say' | 'command' | 'completion';
-  say?: string;
-  ask?: string;
-  text?: string;
-  persona?: 'user' | 'assistant';
-}
+const parser = new ClineMarkdownParser();
 
-export interface ClineTask {
-  id: string;
-  timestamp: number;
-  messages: ClineMessage[];
-  conversationHistory?: Array<{
-    role: string;
-    content: string | { type: string; text?: string }[];
-  }>;
-}
-
-export function parseClineExport(jsonContent: string): ExtractedPrompt[] {
+export function parseClineExport(content: string): ExtractedPrompt[] {
   try {
-    const task: ClineTask = JSON.parse(jsonContent);
-    const prompts: ExtractedPrompt[] = [];
-    
-    // Extract from messages array
-    if (task.messages) {
-      for (const message of task.messages) {
-        let content = '';
-        
-        // Extract user messages
-        if (message.type === 'ask' && message.ask) {
-          content = message.ask;
-        } else if (message.type === 'say' && message.persona === 'user' && message.say) {
-          content = message.say;
-        }
-        
-        if (content.trim()) {
-          const firstLine = content.split('\n')[0];
-          const name = firstLine.length > 50 
-            ? firstLine.substring(0, 50) + '...' 
-            : firstLine;
-
-          prompts.push({
-            name: name || 'Cline Prompt',
-            content: content,
-            metadata: {
-              source: 'cline',
-              conversationId: task.id || `cline-${Date.now()}`,
-              conversationTitle: 'Cline Task',
-              timestamp: message.ts || task.timestamp || Date.now(),
-            },
-          });
-        }
-      }
-    }
-    
-    // Also check conversationHistory if available
-    if (task.conversationHistory) {
-      for (const msg of task.conversationHistory) {
-        if (msg.role === 'user') {
-          let content = '';
-          
-          if (typeof msg.content === 'string') {
-            content = msg.content;
-          } else if (Array.isArray(msg.content)) {
-            content = msg.content
-              .filter(item => item.type === 'text' && item.text)
-              .map(item => item.text)
-              .join('\n');
-          }
-          
-          if (content.trim()) {
-            const firstLine = content.split('\n')[0];
-            const name = firstLine.length > 50 
-              ? firstLine.substring(0, 50) + '...' 
-              : firstLine;
-
-            prompts.push({
-              name: name || 'Cline Prompt',
-              content: content,
-              metadata: {
-                source: 'cline',
-                conversationId: task.id || `cline-${Date.now()}`,
-                conversationTitle: 'Cline Task',
-                timestamp: task.timestamp || Date.now(),
-              },
-            });
-          }
-        }
-      }
-    }
-
-    return prompts;
+    // Parse markdown format
+    const tasks = parser.parseClineMarkdown(content);
+    return parser.extractPromptsFromTasks(tasks);
   } catch (error) {
     console.error('Failed to parse Cline export:', error);
-    throw new Error('Invalid Cline task format');
+    return [];
   }
 }
 
-export function validateClineExport(jsonContent: string): boolean {
+export function validateClineExport(content: string): boolean {
   try {
-    const data = JSON.parse(jsonContent);
-    return data.messages || data.conversationHistory;
+    // Check for Cline markdown patterns
+    const hasTaskHeader = /^#\s*Task/im.test(content);
+    const hasConversation = /^##\s*Conversation/im.test(content);
+    const hasHumanMessages = /^###\s*(Human|User)/im.test(content);
+    const hasAssistantMessages = /^###\s*(Assistant|Cline)/im.test(content);
+    
+    // Valid if it has task header or conversation structure
+    return hasTaskHeader || (hasConversation && (hasHumanMessages || hasAssistantMessages));
   } catch {
     return false;
   }

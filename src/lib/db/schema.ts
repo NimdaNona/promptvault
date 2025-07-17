@@ -114,14 +114,22 @@ export const importSessions = pgTable('import_sessions', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   source: text('source').notNull(), // 'chatgpt', 'claude', 'cline', 'cursor', 'gemini', 'file'
+  status: text('status').default('pending'), // 'pending', 'processing', 'completed', 'failed'
   importedCount: integer('imported_count').default(0),
   skippedCount: integer('skipped_count').default(0),
+  processedCount: integer('processed_count').default(0),
+  totalCount: integer('total_count').default(0),
+  error: text('error'),
+  results: jsonb('results'),
   metadata: jsonb('metadata'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 }, (table) => {
   return {
     userIdIdx: index('import_sessions_user_id_idx').on(table.userId),
     sourceIdx: index('import_sessions_source_idx').on(table.source),
+    statusIdx: index('import_sessions_status_idx').on(table.status),
+    updatedAtIdx: index('import_sessions_updated_at_idx').on(table.updatedAt),
   };
 });
 
