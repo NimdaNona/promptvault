@@ -34,13 +34,31 @@ export default function ChatGPTImportDialog({ onClose, onImport, existingPrompts
 
     setIsImporting(true);
     try {
-      // Extract conversation ID from share link
-      const conversationId = shareLink.split('/share/')[1].split('?')[0];
-      
-      // For MVP, we'll need the user to export manually
-      // In production, you'd fetch the conversation data from ChatGPT API
-      toast.info('Please export your ChatGPT data and upload the JSON file instead. Share link import coming soon!');
-      setActiveTab('export');
+      const response = await fetch('/api/import/chatgpt-share', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ shareLink }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to process share link');
+      }
+
+      if (!data.success) {
+        // Show instructions for manual export
+        toast.info(data.message);
+        setActiveTab('export');
+        
+        // You could also show a modal with detailed instructions
+        console.log('Instructions:', data.instructions);
+      } else {
+        // In the future, this would process the scraped conversation
+        toast.success('Share link processed successfully');
+      }
     } catch (error) {
       console.error('Share link error:', error);
       toast.error('Failed to process share link');
@@ -50,14 +68,37 @@ export default function ChatGPTImportDialog({ onClose, onImport, existingPrompts
   };
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    if (acceptedFiles.length === 0) return;
+    console.log('onDrop triggered with files:', acceptedFiles);
+    if (acceptedFiles.length === 0) {
+      console.log('No files accepted');
+      return;
+    }
 
     const file = acceptedFiles[0];
+    console.log('Processing file:', file.name, file.type, file.size);
     setIsImporting(true);
     setImportResult(null);
 
     try {
-      const result = await PromptImporter.importFromFile(file, 'chatgpt');
+      // First upload the file to get its content
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const uploadResponse = await fetch('/api/import/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload file');
+      }
+
+      const { content } = await uploadResponse.json();
+
+      // Create a temporary file object with the content for the importer
+      const tempFile = new File([content], file.name, { type: file.type });
+      const result = await PromptImporter.importFromFile(tempFile, 'chatgpt');
+      console.log('Import result:', result);
       
       if (result.errors.length > 0) {
         result.errors.forEach(error => toast.error(error));
@@ -81,6 +122,8 @@ export default function ChatGPTImportDialog({ onClose, onImport, existingPrompts
         unique,
         duplicates,
       });
+
+      toast.success(`Found ${result.prompts.length} prompts to import`);
     } catch (error) {
       console.error('Import error:', error);
       toast.error('Failed to import file. Please check the format and try again.');
@@ -89,12 +132,27 @@ export default function ChatGPTImportDialog({ onClose, onImport, existingPrompts
     }
   }, [existingPrompts]);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, acceptedFiles, fileRejections } = useDropzone({
     onDrop,
     accept: {
       'application/json': ['.json'],
     },
     maxFiles: 1,
+    onDropAccepted: (files) => {
+      console.log('Files accepted:', files);
+    },
+    onDropRejected: (fileRejections) => {
+      console.log('Files rejected:', fileRejections);
+      fileRejections.forEach(({ file, errors }) => {
+        errors.forEach(error => {
+          if (error.code === 'file-invalid-type') {
+            toast.error(`Invalid file type: ${file.type}. Please upload a JSON file.`);
+          } else {
+            toast.error(error.message);
+          }
+        });
+      });
+    },
   });
 
   const handleImport = async () => {
@@ -111,6 +169,30 @@ export default function ChatGPTImportDialog({ onClose, onImport, existingPrompts
 
     setIsImporting(true);
     try {
+      // Call the bulk import API
+      const response = await fetch('/api/import/bulk', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompts: promptsToImport,
+          source: 'chatgpt',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to import prompts');
+      }
+
+      const data = await response.json();
+      toast.success(`Successfully imported ${data.imported} prompts`);
+      
+      if (data.skipped > 0) {
+        toast.warning(`Skipped ${data.skipped} prompts due to errors`);
+      }
+
+      // Call parent callback
       await onImport(promptsToImport);
       onClose();
     } catch (error) {

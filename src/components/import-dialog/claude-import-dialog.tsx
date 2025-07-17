@@ -27,7 +27,24 @@ export default function ClaudeImportDialog({ onClose, onImport, existingPrompts 
     setImportResult(null);
 
     try {
-      const result = await PromptImporter.importFromFile(file, 'claude');
+      // Upload file first
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const uploadResponse = await fetch('/api/import/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload file');
+      }
+
+      const { content } = await uploadResponse.json();
+
+      // Process with importer
+      const tempFile = new File([content], file.name, { type: file.type });
+      const result = await PromptImporter.importFromFile(tempFile, 'claude');
       
       if (result.errors.length > 0) {
         result.errors.forEach(error => toast.error(error));
@@ -51,6 +68,8 @@ export default function ClaudeImportDialog({ onClose, onImport, existingPrompts 
         unique,
         duplicates,
       });
+
+      toast.success(`Found ${result.prompts.length} prompts to import`);
     } catch (error) {
       console.error('Import error:', error);
       toast.error('Failed to import file. Please check the format and try again.');
@@ -84,6 +103,29 @@ export default function ClaudeImportDialog({ onClose, onImport, existingPrompts 
 
     setIsImporting(true);
     try {
+      // Call the bulk import API
+      const response = await fetch('/api/import/bulk', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompts: promptsToImport,
+          source: 'claude',
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to import prompts');
+      }
+
+      const data = await response.json();
+      toast.success(`Successfully imported ${data.imported} prompts`);
+      
+      if (data.skipped > 0) {
+        toast.warning(`Skipped ${data.skipped} prompts due to errors`);
+      }
+
       await onImport(promptsToImport);
       onClose();
     } catch (error) {
@@ -173,9 +215,9 @@ export default function ClaudeImportDialog({ onClose, onImport, existingPrompts 
               <div className="p-6">
                 {activeTab === 'app' ? (
                   <div className="space-y-6">
-                    <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
-                      <p className="text-sm text-orange-800 dark:text-orange-200">
-                        Note: Claude app export is coming soon. The parser is in development.
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                      <p className="text-sm text-blue-800 dark:text-blue-200">
+                        Claude app export is now supported. Follow the steps below to export your data.
                       </p>
                     </div>
 
@@ -215,9 +257,9 @@ export default function ClaudeImportDialog({ onClose, onImport, existingPrompts 
                   </div>
                 ) : (
                   <div className="space-y-6">
-                    <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
-                      <p className="text-sm text-orange-800 dark:text-orange-200">
-                        Note: Claude Code JSONL parser is coming soon. The parser is in development.
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                      <p className="text-sm text-blue-800 dark:text-blue-200">
+                        Claude Code JSONL files are supported. Upload your session files below.
                       </p>
                     </div>
 

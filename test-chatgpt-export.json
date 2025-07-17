@@ -1,0 +1,73 @@
+{
+  "conversations": [
+    {
+      "id": "test-conv-1",
+      "title": "Test Conversation 1",
+      "create_time": 1703001600,
+      "update_time": 1703005200,
+      "mapping": {
+        "msg1": {
+          "id": "msg1",
+          "message": {
+            "id": "msg1",
+            "author": {
+              "role": "system"
+            },
+            "content": {
+              "content_type": "text",
+              "parts": ["You are a helpful assistant."]
+            }
+          },
+          "parent": null,
+          "children": ["msg2"]
+        },
+        "msg2": {
+          "id": "msg2",
+          "message": {
+            "id": "msg2",
+            "author": {
+              "role": "user"
+            },
+            "content": {
+              "content_type": "text",
+              "parts": ["Write a Python function to calculate factorial"]
+            }
+          },
+          "parent": "msg1",
+          "children": ["msg3"]
+        },
+        "msg3": {
+          "id": "msg3",
+          "message": {
+            "id": "msg3",
+            "author": {
+              "role": "assistant"
+            },
+            "content": {
+              "content_type": "text",
+              "parts": ["Here's a Python function to calculate factorial:\n\n```python\ndef factorial(n):\n    if n < 0:\n        return None\n    elif n == 0 or n == 1:\n        return 1\n    else:\n        return n * factorial(n - 1)\n```"]
+            }
+          },
+          "parent": "msg2",
+          "children": ["msg4"]
+        },
+        "msg4": {
+          "id": "msg4",
+          "message": {
+            "id": "msg4",
+            "author": {
+              "role": "user"
+            },
+            "content": {
+              "content_type": "text",
+              "parts": ["Now write it iteratively"]
+            }
+          },
+          "parent": "msg3",
+          "children": []
+        }
+      },
+      "current_node": "msg4"
+    }
+  ]
+}
