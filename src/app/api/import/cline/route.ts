@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 
     // Get user data
     const user = await db.query.users.findFirst({
-      where: eq(users.clerkId, userId),
+      where: eq(users.id, userId),
     });
 
     if (!user) {
@@ -199,7 +199,7 @@ export async function GET(request: NextRequest) {
 
     // Verify session belongs to user
     const user = await db.query.users.findFirst({
-      where: eq(users.clerkId, userId),
+      where: eq(users.id, userId),
     });
 
     if (!user) {

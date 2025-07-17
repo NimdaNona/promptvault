@@ -1,0 +1,41 @@
+[16:29:21.878] Running build in Washington, D.C., USA (East) – iad1
+[16:29:21.879] Build machine configuration: 4 cores, 8 GB
+[16:29:21.894] Cloning github.com/NimdaNona/promptvault (Branch: main, Commit: e4097fe)
+[16:29:22.520] Cloning completed: 626.000ms
+[16:29:24.961] Restored build cache from previous deployment (AxizgyUgAtT52HP2ZUmFU45BYMai)
+[16:29:29.070] Running "vercel build"
+[16:29:29.562] Vercel CLI 44.4.3
+[16:29:29.884] Installing dependencies...
+[16:29:31.445] 
+[16:29:31.445] up to date in 1s
+[16:29:31.446] 
+[16:29:31.446] 185 packages are looking for funding
+[16:29:31.446]   run `npm fund` for details
+[16:29:31.480] Detected Next.js version: 15.4.1
+[16:29:31.485] Running "npm run build"
+[16:29:31.608] 
+[16:29:31.608] > promptvault@0.1.0 build
+[16:29:31.608] > next build
+[16:29:31.608] 
+[16:29:32.993]    ▲ Next.js 15.4.1
+[16:29:32.993] 
+[16:29:33.035]    Creating an optimized production build ...
+[16:29:49.094] <w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (150kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+[16:29:56.126]  ✓ Compiled successfully in 19.0s
+[16:29:56.131]    Linting and checking validity of types ...
+[16:30:06.921] Failed to compile.
+[16:30:06.921] 
+[16:30:06.921] ./src/app/api/import/cline/route.ts:39:23
+[16:30:06.922] Type error: Property 'clerkId' does not exist on type 'PgTableWithColumns<{ name: "users"; schema: undefined; columns: { id: PgColumn<{ name: "id"; tableName: "users"; dataType: "string"; columnType: "PgText"; data: string; driverParam: string; notNull: true; hasDefault: false; ... 6 more ...; generated: undefined; }, {}, {}>; ... 7 more ...; updatedAt: PgColumn<...>; }...'.
+[16:30:06.922] 
+[16:30:06.922] [0m [90m 37 |[39m     [90m// Get user data[39m
+[16:30:06.922]  [90m 38 |[39m     [36mconst[39m user [33m=[39m [36mawait[39m db[33m.[39mquery[33m.[39musers[33m.[39mfindFirst({
+[16:30:06.922] [31m[1m>[22m[39m[90m 39 |[39m       where[33m:[39m eq(users[33m.[39mclerkId[33m,[39m userId)[33m,[39m
+[16:30:06.922]  [90m    |[39m                       [31m[1m^[22m[39m
+[16:30:06.922]  [90m 40 |[39m     })[33m;[39m
+[16:30:06.922]  [90m 41 |[39m
+[16:30:06.922]  [90m 42 |[39m     [36mif[39m ([33m![39muser) {[0m
+[16:30:06.959] Next.js build worker exited with code: 1 and signal: null
+[16:30:06.982] Error: Command "npm run build" exited with 1
+[16:30:08.439] 
+[16:30:12.093] Exiting build container
