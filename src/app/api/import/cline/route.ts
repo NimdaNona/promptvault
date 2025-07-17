@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { ClineMarkdownParser } from '@/lib/importers/cline-markdown-parser';
 import { createImportSession, updateImportSession } from '@/lib/import/utils';
 import { processImportBatch } from '@/lib/import/batch-processor';
-import { ImportProgressTracker } from '@/lib/import/progress';
+import { importProgress } from '@/lib/import/progress';
 import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
@@ -22,9 +22,6 @@ const ClineImportSchema = z.object({
     skipAI: z.boolean().optional(),
   }).optional(),
 });
-
-// Progress tracker instance
-const progressTracker = new ImportProgressTracker();
 
 export async function POST(request: NextRequest) {
   try {
@@ -74,7 +71,7 @@ export async function POST(request: NextRequest) {
     );
 
     // Update progress
-    progressTracker.updateProgress(session.id, {
+    importProgress.updateProgress(session.id, {
       status: 'processing',
       progress: 0,
       message: 'Starting Cline import...',
@@ -82,7 +79,7 @@ export async function POST(request: NextRequest) {
 
     try {
       // Parse all files
-      progressTracker.updateProgress(session.id, {
+      importProgress.updateProgress(session.id, {
         progress: 10,
         message: `Parsing ${files.length} Cline markdown file(s)...`,
       });
@@ -95,7 +92,7 @@ export async function POST(request: NextRequest) {
       const clineParser = new ClineMarkdownParser();
       const extractedPrompts = await clineParser.parseMultipleFiles(fileInputs);
 
-      progressTracker.updateProgress(session.id, {
+      importProgress.updateProgress(session.id, {
         progress: 30,
         message: `Extracted ${extractedPrompts.length} prompts from Cline tasks`,
         metadata: {
@@ -113,7 +110,7 @@ export async function POST(request: NextRequest) {
           defaultTags: options.tags,
           skipAI: options.skipAI,
           onProgress: (progress) => {
-            progressTracker.updateProgress(session.id, {
+            importProgress.updateProgress(session.id, {
               progress: 30 + (progress * 0.6), // 30-90% range
               message: progress < 100 
                 ? 'Processing and categorizing prompts...' 
@@ -134,7 +131,7 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      progressTracker.updateProgress(session.id, {
+      importProgress.updateProgress(session.id, {
         status: 'completed',
         progress: 100,
         message: `Successfully imported ${processedPrompts.length} prompts`,
@@ -164,7 +161,7 @@ export async function POST(request: NextRequest) {
         error: error instanceof Error ? error.message : 'Unknown error',
       });
 
-      progressTracker.updateProgress(session.id, {
+      importProgress.updateProgress(session.id, {
         status: 'failed',
         progress: 100,
         message: `Import failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -210,7 +207,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Stream progress updates
-    const stream = progressTracker.streamProgress(sessionId);
+    const stream = importProgress.streamProgress(sessionId);
 
     return new Response(stream, {
       headers: {

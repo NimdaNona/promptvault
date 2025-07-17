@@ -1,0 +1,41 @@
+[16:24:13.627] Running build in Washington, D.C., USA (East) – iad1
+[16:24:13.627] Build machine configuration: 4 cores, 8 GB
+[16:24:13.643] Cloning github.com/NimdaNona/promptvault (Branch: main, Commit: 069246c)
+[16:24:14.249] Cloning completed: 605.000ms
+[16:24:17.376] Restored build cache from previous deployment (AxizgyUgAtT52HP2ZUmFU45BYMai)
+[16:24:19.917] Running "vercel build"
+[16:24:20.398] Vercel CLI 44.4.3
+[16:24:20.703] Installing dependencies...
+[16:24:22.160] 
+[16:24:22.160] up to date in 1s
+[16:24:22.161] 
+[16:24:22.161] 185 packages are looking for funding
+[16:24:22.161]   run `npm fund` for details
+[16:24:22.194] Detected Next.js version: 15.4.1
+[16:24:22.199] Running "npm run build"
+[16:24:22.436] 
+[16:24:22.436] > promptvault@0.1.0 build
+[16:24:22.437] > next build
+[16:24:22.437] 
+[16:24:23.635]    ▲ Next.js 15.4.1
+[16:24:23.635] 
+[16:24:23.670]    Creating an optimized production build ...
+[16:24:38.317] <w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (150kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+[16:24:44.835]  ✓ Compiled successfully in 17.0s
+[16:24:44.840]    Linting and checking validity of types ...
+[16:24:54.648] Failed to compile.
+[16:24:54.649] 
+[16:24:54.649] ./src/app/api/import/cline/route.ts:27:25
+[16:24:54.649] Type error: Constructor of class 'ImportProgressTracker' is private and only accessible within the class declaration.
+[16:24:54.649] 
+[16:24:54.649] [0m [90m 25 |[39m
+[16:24:54.649]  [90m 26 |[39m [90m// Progress tracker instance[39m
+[16:24:54.650] [31m[1m>[22m[39m[90m 27 |[39m [36mconst[39m progressTracker [33m=[39m [36mnew[39m [33mImportProgressTracker[39m()[33m;[39m
+[16:24:54.650]  [90m    |[39m                         [31m[1m^[22m[39m
+[16:24:54.650]  [90m 28 |[39m
+[16:24:54.650]  [90m 29 |[39m [36mexport[39m [36masync[39m [36mfunction[39m [33mPOST[39m(request[33m:[39m [33mNextRequest[39m) {
+[16:24:54.650]  [90m 30 |[39m   [36mtry[39m {[0m
+[16:24:54.686] Next.js build worker exited with code: 1 and signal: null
+[16:24:54.707] Error: Command "npm run build" exited with 1
+[16:24:55.067] 
+[16:24:58.358] Exiting build container
