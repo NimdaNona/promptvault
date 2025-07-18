@@ -1,12 +1,10 @@
 {
   "functions": {
     "src/app/api/import/cline/route.ts": {
-      "maxDuration": 10,
-      "runtime": "nodejs22.x"
+      "maxDuration": 10
     },
     "src/app/api/import/cline-background/route.ts": {
-      "maxDuration": 300,
-      "runtime": "nodejs22.x"
+      "maxDuration": 300
     }
   },
   "crons": [],
