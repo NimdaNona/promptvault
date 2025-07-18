@@ -8,6 +8,8 @@ const isProtectedRoute = createRouteMatcher([
   '/api/prompts(.*)',
   '/api/optimize(.*)',
   '/api/billing(.*)',
+  '/api/import(.*)',
+  '/api/ai(.*)',
   '/onboarding(.*)',
 ]);
 
