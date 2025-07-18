@@ -23,6 +23,7 @@ export async function POST(req: Request) {
     const blob = await put(`imports/${userId}/${Date.now()}-${file.name}`, file, {
       access: 'public',
       addRandomSuffix: true,
+      token: process.env.BLOB_READ_WRITE_TOKEN,
     });
 
     // Read file content for processing

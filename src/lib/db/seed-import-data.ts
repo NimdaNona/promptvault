@@ -12,7 +12,7 @@ async function seedImportData() {
   try {
     // Find a test user (you'll need to replace this with your actual test user ID)
     const testUser = await db.query.users.findFirst({
-      where: eq(users.id, "user_2p3WiPFGgBcDeFgHiJkL") // Replace with your test user clerk ID
+      where: eq(users.id, "user_2zyLTlY0tfY5EvH7oziEKbKFTev") // Replace with your test user clerk ID
     });
 
     if (!testUser) {
