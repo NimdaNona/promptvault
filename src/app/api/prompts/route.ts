@@ -5,6 +5,9 @@ import { eq, and, like, desc } from "drizzle-orm";
 import { z } from "zod";
 import { TIERS } from "@/lib/stripe";
 
+// Force Node.js runtime for database operations
+export const runtime = 'nodejs';
+
 // Schema for creating a prompt
 const createPromptSchema = z.object({
   name: z.string().min(1).max(255),

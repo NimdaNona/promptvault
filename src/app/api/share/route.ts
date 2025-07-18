@@ -5,6 +5,9 @@ import { eq, and } from "drizzle-orm";
 import { z } from "zod";
 import { nanoid } from "nanoid";
 
+// Force Node.js runtime for database operations
+export const runtime = 'nodejs';
+
 const createShareSchema = z.object({
   promptId: z.string().uuid(),
   expiresIn: z.number().optional(), // hours

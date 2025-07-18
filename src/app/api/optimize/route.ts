@@ -6,6 +6,9 @@ import { z } from "zod";
 import { optimizePrompt, evaluatePrompt, generatePromptVariants } from "@/lib/openai";
 import { TIERS } from "@/lib/stripe";
 
+// Force Node.js runtime for database operations
+export const runtime = 'nodejs';
+
 const optimizeSchema = z.object({
   prompt: z.string().min(1),
   model: z.string().optional(),

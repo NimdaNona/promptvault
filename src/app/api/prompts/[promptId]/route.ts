@@ -4,6 +4,9 @@ import { prompts, promptVersions, promptTags, tags, users } from "@/lib/db/schem
 import { eq, and } from "drizzle-orm";
 import { z } from "zod";
 
+// Force Node.js runtime for database operations
+export const runtime = 'nodejs';
+
 // Schema for updating a prompt
 const updatePromptSchema = z.object({
   name: z.string().min(1).max(255).optional(),

@@ -5,6 +5,9 @@ import { eq } from "drizzle-orm";
 import { createCheckoutSession, createBillingPortalSession } from "@/lib/stripe";
 import { z } from "zod";
 
+// Force Node.js runtime for database operations
+export const runtime = 'nodejs';
+
 const checkoutSchema = z.object({
   tier: z.enum(['pro', 'enterprise']),
 });

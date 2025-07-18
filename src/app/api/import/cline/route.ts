@@ -9,6 +9,10 @@ import { importProgress } from '@/lib/import/progress';
 import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
+// Force this API route to run in a Node.js serverless function
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 // Schema for import request
 const ClineImportSchema = z.object({
   files: z.array(z.object({
