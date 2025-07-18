@@ -1,0 +1,22 @@
+{
+  "functions": {
+    "src/app/api/import/cline/route.ts": {
+      "maxDuration": 10,
+      "runtime": "nodejs22.x"
+    },
+    "src/app/api/import/cline-background/route.ts": {
+      "maxDuration": 300,
+      "runtime": "nodejs22.x"
+    }
+  },
+  "crons": [],
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "env": {
+    "OTEL_ENABLED": "1",
+    "OTEL_EXPORTER_OTLP_COMPRESSION": "gzip",
+    "OTEL_RESOURCE_ATTRIBUTES": "deployment.environment=production"
+  }
+}

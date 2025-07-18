@@ -1,18 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
+import { db } from '@/lib/db';
+import { z } from 'zod';
+import { ClineMarkdownParser } from '@/lib/importers/cline-markdown-parser';
+import { createImportSession, updateImportSession } from '@/lib/import/utils';
+import { processImportBatch } from '@/lib/import/batch-processor';
+import { importProgress } from '@/lib/import/progress';
+import { users } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
 
 // Force this API route to run in a Node.js serverless function
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-// Standard function timeout (10 seconds)
-export const maxDuration = 10;
+// Schema for import request
+const ClineImportSchema = z.object({
+  files: z.array(z.object({
+    url: z.string().url(),
+    filename: z.string(),
+    content: z.string(),
+  })).min(1).max(50), // Limit to 50 files
+  options: z.object({
+    targetFolder: z.string().optional(),
+    defaultTags: z.array(z.string()).optional(),
+    skipAI: z.boolean().optional(),
+  }).optional(),
+});
 
 export async function POST(request: NextRequest) {
   try {
-    // Dynamic imports to reduce bundle size and improve serverless performance
-    const { auth } = await import('@clerk/nextjs/server');
-    const { z } = await import('zod');
-    
     // Check authentication
     const { userId } = await auth();
     if (!userId) {
@@ -21,117 +37,6 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
-
-    // Parse and validate request body
-    const body = await request.json();
-    
-    // Schema for import request
-    const ClineImportSchema = z.object({
-      files: z.array(z.object({
-        url: z.string().url(),
-        filename: z.string(),
-        content: z.string(),
-      })).min(1).max(50),
-      options: z.object({
-        targetFolder: z.string().optional(),
-        defaultTags: z.array(z.string()).optional(),
-        skipAI: z.boolean().optional(),
-        useBackground: z.boolean().optional(), // Option to use background processing
-      }).optional(),
-    });
-    
-    const validation = ClineImportSchema.safeParse(body);
-    if (!validation.success) {
-      return NextResponse.json(
-        { error: 'Invalid request', details: validation.error.errors },
-        { status: 400 }
-      );
-    }
-
-    const { files, options = {} } = validation.data;
-
-    // Check if we should use background processing for large imports
-    const totalSize = files.reduce((sum, f) => sum + f.content.length, 0);
-    const shouldUseBackground = options.useBackground || totalSize > 1000000; // 1MB
-
-    if (shouldUseBackground) {
-      // Create session and redirect to background processor
-      const { createImportSession } = await import('@/lib/import/utils');
-      const { db } = await import('@/lib/db');
-      const { users } = await import('@/lib/db/schema');
-      const { eq } = await import('drizzle-orm');
-      
-      // Get user
-      const user = await db.query.users.findFirst({
-        where: eq(users.id, userId),
-      });
-
-      if (!user) {
-        return NextResponse.json(
-          { error: 'User not found' },
-          { status: 404 }
-        );
-      }
-
-      // Create import session
-      const session = await createImportSession(
-        user.id,
-        'cline',
-        {
-          fileCount: files.length,
-          totalSize,
-          options,
-          background: true,
-        }
-      );
-
-      // Call background endpoint
-      const backgroundResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_APP_URL || 'https://aipromptvault.app'}/api/import/cline-background`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': request.headers.get('Authorization') || '',
-          },
-          body: JSON.stringify({
-            sessionId: session.id,
-            files,
-            options,
-          }),
-        }
-      );
-
-      if (!backgroundResponse.ok) {
-        throw new Error('Failed to start background import');
-      }
-
-      return NextResponse.json({
-        success: true,
-        sessionId: session.id,
-        background: true,
-        message: 'Import started in background',
-      });
-    }
-
-    // For small imports, process immediately
-    const [
-      { db },
-      { users },
-      { eq },
-      { ClineMarkdownParser },
-      { createImportSession, updateImportSession },
-      { processImportBatch },
-      { importProgress }
-    ] = await Promise.all([
-      import('@/lib/db'),
-      import('@/lib/db/schema'),
-      import('drizzle-orm'),
-      import('@/lib/importers/cline-markdown-parser'),
-      import('@/lib/import/utils'),
-      import('@/lib/import/batch-processor'),
-      import('@/lib/import/progress')
-    ]);
 
     // Get user data
     const user = await db.query.users.findFirst({
@@ -145,13 +50,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Parse request body
+    const body = await request.json();
+    const validation = ClineImportSchema.safeParse(body);
+
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: 'Invalid request', details: validation.error.errors },
+        { status: 400 }
+      );
+    }
+
+    const { files, options = {} } = validation.data;
+
     // Create import session
     const session = await createImportSession(
       user.id,
       'cline',
       {
         fileCount: files.length,
-        totalSize,
+        totalSize: files.reduce((sum, f) => sum + f.content.length, 0),
         options,
       }
     );
@@ -197,7 +115,7 @@ export async function POST(request: NextRequest) {
           skipAI: options.skipAI,
           onProgress: (progress) => {
             importProgress.updateProgress(session.id, {
-              progress: 30 + (progress * 0.6),
+              progress: 30 + (progress * 0.6), // 30-90% range
               message: progress < 100 
                 ? 'Processing and categorizing prompts...' 
                 : 'Finalizing import...',
@@ -268,12 +186,10 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Endpoint for progress streaming with dynamic imports
+// Endpoint for progress streaming
 export async function GET(request: NextRequest) {
   try {
-    const { auth } = await import('@clerk/nextjs/server');
     const { userId } = await auth();
-    
     if (!userId) {
       return new Response('Unauthorized', { status: 401 });
     }
@@ -284,14 +200,6 @@ export async function GET(request: NextRequest) {
     if (!sessionId) {
       return new Response('Missing sessionId', { status: 400 });
     }
-
-    // Dynamic imports
-    const [{ db }, { users }, { eq }, { importProgress }] = await Promise.all([
-      import('@/lib/db'),
-      import('@/lib/db/schema'),
-      import('drizzle-orm'),
-      import('@/lib/import/progress')
-    ]);
 
     // Verify session belongs to user
     const user = await db.query.users.findFirst({

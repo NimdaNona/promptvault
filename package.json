@@ -16,6 +16,7 @@
     "@clerk/nextjs": "^6.25.1",
     "@neondatabase/serverless": "^1.0.1",
     "@vercel/blob": "^1.1.1",
+    "@vercel/otel": "^1.13.0",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.44.3",
     "framer-motion": "^12.23.6",

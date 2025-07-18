@@ -1,0 +1,59 @@
+It appears that even after adding `export const runtime = 'nodejs'` and `dynamic = 'force‑dynamic'` to `src/app/api/import/cline/route.ts`, the `POST /api/import/cline` endpoint continues to return **404 Not Found** on production. I reviewed the most recent commit and deployment:
+
+* The updated `route.ts` declares both `runtime='nodejs'` and `dynamic='force‑dynamic'`.
+* The latest production deployment (ID `J1WSrNoBi`) includes a serverless function for `/api/import/cline`; the build output lists it with a 172‑B compressed size and 100‑kB uncompressed size. This confirms the file is compiled during build.
+* However, runtime logs for this deployment show that each POST request to `/api/import/cline` results in **“Function Invocation Not Found 404”**, even though the same deployment successfully handles `/api/import/upload` requests. The logs indicate the Node.js runtime (v22.x) is used and that the deployment ID matches the latest build.
+
+Given that the function is built but not invokable, the issue likely stems from a Next.js/Vercel routing quirk rather than a coding error. The `app`‑router API routes are still relatively new, and there are multiple open community threads where dynamic API routes compiled under `src/app/api/*/route.ts` work locally but return 404 in production. In these threads, adding `runtime='nodejs'` and `dynamic='force‑dynamic'` often didn’t help, and some teams resorted to moving the route out of the `app` directory or changing the build strategy. The build logs show no compile errors for `api/import/cline`, but the runtime is still not mapping the request to the function.
+
+### Recommended remediation plan
+
+1. **Verify path handling with a minimal handler** – Create a temporary copy of the Cline import route (e.g., `src/app/api/import/cline/test.ts`) or replace its contents with a minimal handler:
+
+   ```ts
+   export const runtime = 'nodejs';
+   export async function POST() {
+     return new Response(JSON.stringify({ ok: true }), { status: 200 });
+   }
+   ```
+
+   Deploy this change and test `POST /api/import/cline`.
+
+   * If this returns **200**, the existing code’s heavy dependencies (`drizzle-orm`, `@clerk/nextjs/server`, etc.) are likely preventing the function from loading at runtime; in that case proceed with steps 4–7.
+   * If it still returns **404**, the issue is with route resolution (see step 2).
+
+2. **Move the route out of the `app` directory** – According to Next.js and Vercel support, API routes under `src/app/api` may conflict with other runtime environments when the project includes custom serverless functions or uses Fluid Compute. Move the import logic to a `pages` API route, which is stable and always runs on Node.js.
+
+   * Create `src/pages/api/import/cline.ts` with the same handler logic. API routes in the **Pages Router** are more mature and do not require `runtime` declarations.
+   * Update the front‑end code to call `/api/import/cline` (which will now resolve to the pages route).
+   * Remove the `app/api/import/cline` directory to avoid conflicting routes.
+     Deploy and test again. This change alone has resolved similar 404 issues for other teams.
+
+3. **Use a dedicated serverless function (Vercel Function) instead of a Next.js route** – If you need more control over the environment or function size, create an `/api/import-cline.ts` at the project root and add a `vercel.json` file to map the route:
+
+   ```json
+   {
+     "functions": { "api/import-cline.ts": { "runtime": "nodejs" } },
+     "routes": [
+       { "src": "/api/import/cline", "dest": "/api/import-cline.ts" }
+     ]
+   }
+   ```
+
+   This ensures Vercel deploys the file as a standalone Node.js function, bypassing the Next.js router entirely.
+
+4. **Trim heavy dependencies and use serverless‑friendly drivers** – If the minimal handler works but the full logic causes 404, the problem is likely bundling or runtime incompatibility.
+
+   * Replace `drizzle-orm`’s default Postgres driver with **Neon’s serverless driver** (`@neondatabase/serverless` or `@vercel/postgres`) and Drizzle’s `neon-http` driver. These drivers use HTTP rather than TCP and are designed for serverless functions, eliminating the need for heavy Node database drivers.
+   * Avoid importing large packages at the top of the file. Dynamically import heavy modules (`import('drizzle-orm')`) inside the handler so they’re tree‑shaken when unused.
+   * Remove unused functions (`eq`, etc.) from the top-level import.
+
+5. **Consider using Vercel Background Functions or Vercel’s Queue** – The Cline import operation processes multiple files, parses markdown, and inserts many prompts. If the issue stems from timeouts or large memory usage, migrating this logic to a **Background Function** or **Cron Job** will allow longer execution times and larger bundles. The front‑end can call a lightweight API route that enqueues the import job to a Vercel queue and returns immediately. Once the job finishes, you can fetch progress from the database.
+
+6. **Disable Fluid Compute** – Fluid Compute is currently enabled on this project (per the deployment details). Some users have reported API routes vanishing under Fluid Compute. You can disable Fluid Compute under Project → Settings → General and redeploy to see if the route becomes available.
+
+7. **Monitor with Vercel’s Observability** – Enable Observability (Pro plan) to capture metrics and request traces for the import route. Observability can reveal if the route is invoked but crashes during initialization, which will help differentiate between routing issues and runtime failures.
+
+Implementing steps 1 and 2 will quickly reveal whether the problem is due to routing or code size. If the minimal handler works in the `app` directory, then heavy dependencies or runtime mismatches are to blame; switching to a pages API route and serverless‑friendly drivers is the most robust fix. If the route still 404s even with a minimal handler, then the `app/api` architecture is likely incompatible with your project configuration (possibly due to Fluid Compute or other integrations), and moving to a pages route or dedicated Vercel Function will resolve the issue.
+
+**Citations:** Build logs confirm that `/api/import/cline` is compiled as a function. Runtime logs for the latest deployment show repeated 404s for the POST `/api/import/cline` endpoint and the message “Function Invocation Not Found”, while other routes like `/api/import/upload` succeed, indicating a routing issue rather than a general deployment failure.
