@@ -1,0 +1,42 @@
+[19:45:08.934] Running build in Washington, D.C., USA (East) – iad1
+[19:45:08.935] Build machine configuration: 4 cores, 8 GB
+[19:45:08.950] Cloning github.com/NimdaNona/promptvault (Branch: main, Commit: 46afffa)
+[19:45:09.273] Cloning completed: 323.000ms
+[19:45:12.191] Restored build cache from previous deployment (GYB3C9sGW8TyeNjf5U2Tx7KHLWt9)
+[19:45:14.695] Running "vercel build"
+[19:45:15.219] Vercel CLI 44.5.0
+[19:45:15.369] Detected OpenTelemetry dependency: @vercel/otel@1.13.0, which meets the minimum version requirement of 1.11.0
+[19:45:15.552] Running "install" command: `npm install`...
+[19:45:18.056] 
+[19:45:18.057] added 44 packages, and audited 807 packages in 2s
+[19:45:18.057] 
+[19:45:18.057] 187 packages are looking for funding
+[19:45:18.057]   run `npm fund` for details
+[19:45:18.075] 
+[19:45:18.075] 4 moderate severity vulnerabilities
+[19:45:18.075] 
+[19:45:18.075] To address all issues (including breaking changes), run:
+[19:45:18.076]   npm audit fix --force
+[19:45:18.076] 
+[19:45:18.076] Run `npm audit` for details.
+[19:45:18.111] Detected Next.js version: 15.4.1
+[19:45:18.112] Running "npm run build"
+[19:45:18.370] 
+[19:45:18.370] > promptvault@0.1.0 build
+[19:45:18.371] > next build
+[19:45:18.371] 
+[19:45:19.681]    ▲ Next.js 15.4.1
+[19:45:19.681] 
+[19:45:19.724]    Creating an optimized production build ...
+[19:45:32.540] Failed to compile.
+[19:45:32.540] 
+[19:45:32.541] ./src/app/settings/profile/page.tsx
+[19:45:32.541] Module not found: Can't resolve './profile-form'
+[19:45:32.541] 
+[19:45:32.541] https://nextjs.org/docs/messages/module-not-found
+[19:45:32.541] 
+[19:45:32.546] 
+[19:45:32.546] > Build failed because of webpack errors
+[19:45:32.574] Error: Command "npm run build" exited with 1
+[19:45:32.950] 
+[19:45:35.764] Exiting build container
