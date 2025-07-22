@@ -1,0 +1,81 @@
+[19:32:39.873] Running build in Washington, D.C., USA (East) – iad1
+[19:32:39.874] Build machine configuration: 4 cores, 8 GB
+[19:32:39.891] Cloning github.com/NimdaNona/promptvault (Branch: main, Commit: f4cd156)
+[19:32:40.176] Cloning completed: 285.000ms
+[19:32:43.268] Restored build cache from previous deployment (GYB3C9sGW8TyeNjf5U2Tx7KHLWt9)
+[19:32:45.750] Running "vercel build"
+[19:32:46.242] Vercel CLI 44.5.0
+[19:32:46.392] Detected OpenTelemetry dependency: @vercel/otel@1.13.0, which meets the minimum version requirement of 1.11.0
+[19:32:46.567] Running "install" command: `npm install`...
+[19:32:48.689] 
+[19:32:48.689] added 13 packages, and audited 776 packages in 2s
+[19:32:48.690] 
+[19:32:48.690] 186 packages are looking for funding
+[19:32:48.690]   run `npm fund` for details
+[19:32:48.711] 
+[19:32:48.711] 4 moderate severity vulnerabilities
+[19:32:48.711] 
+[19:32:48.711] To address all issues (including breaking changes), run:
+[19:32:48.711]   npm audit fix --force
+[19:32:48.712] 
+[19:32:48.712] Run `npm audit` for details.
+[19:32:48.745] Detected Next.js version: 15.4.1
+[19:32:48.746] Running "npm run build"
+[19:32:48.864] 
+[19:32:48.864] > promptvault@0.1.0 build
+[19:32:48.865] > next build
+[19:32:48.865] 
+[19:32:50.071]    ▲ Next.js 15.4.1
+[19:32:50.071] 
+[19:32:50.111]    Creating an optimized production build ...
+[19:33:02.928] Failed to compile.
+[19:33:02.928] 
+[19:33:02.928] ./src/components/import/import-dialog.tsx
+[19:33:02.928] Module not found: Can't resolve '@/components/ui/tabs'
+[19:33:02.929] 
+[19:33:02.929] https://nextjs.org/docs/messages/module-not-found
+[19:33:02.929] 
+[19:33:02.929] Import trace for requested module:
+[19:33:02.929] ./src/app/test-import/page.tsx
+[19:33:02.929] 
+[19:33:02.929] ./src/components/import/progress-display.tsx
+[19:33:02.929] Module not found: Can't resolve '@/components/ui/progress'
+[19:33:02.929] 
+[19:33:02.929] https://nextjs.org/docs/messages/module-not-found
+[19:33:02.929] 
+[19:33:02.929] Import trace for requested module:
+[19:33:02.929] ./src/components/import/import-dialog.tsx
+[19:33:02.929] ./src/app/test-import/page.tsx
+[19:33:02.929] 
+[19:33:02.929] ./src/components/import/progress-display.tsx
+[19:33:02.930] Module not found: Can't resolve '@/components/ui/alert'
+[19:33:02.930] 
+[19:33:02.930] https://nextjs.org/docs/messages/module-not-found
+[19:33:02.930] 
+[19:33:02.930] Import trace for requested module:
+[19:33:02.930] ./src/components/import/import-dialog.tsx
+[19:33:02.930] ./src/app/test-import/page.tsx
+[19:33:02.930] 
+[19:33:02.930] ./src/components/import/upload-component.tsx
+[19:33:02.930] Module not found: Can't resolve '@/components/ui/progress'
+[19:33:02.930] 
+[19:33:02.930] https://nextjs.org/docs/messages/module-not-found
+[19:33:02.931] 
+[19:33:02.931] Import trace for requested module:
+[19:33:02.931] ./src/components/import/import-dialog.tsx
+[19:33:02.931] ./src/app/test-import/page.tsx
+[19:33:02.931] 
+[19:33:02.931] ./src/components/import/upload-component.tsx
+[19:33:02.931] Module not found: Can't resolve '@/components/ui/alert'
+[19:33:02.931] 
+[19:33:02.931] https://nextjs.org/docs/messages/module-not-found
+[19:33:02.931] 
+[19:33:02.931] Import trace for requested module:
+[19:33:02.931] ./src/components/import/import-dialog.tsx
+[19:33:02.931] ./src/app/test-import/page.tsx
+[19:33:02.932] 
+[19:33:02.935] 
+[19:33:02.935] > Build failed because of webpack errors
+[19:33:02.966] Error: Command "npm run build" exited with 1
+[19:33:03.368] 
+[19:33:06.252] Exiting build container
