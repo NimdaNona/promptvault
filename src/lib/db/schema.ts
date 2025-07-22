@@ -111,25 +111,27 @@ export const teamInvites = pgTable('team_invites', {
 
 // Import sessions
 export const importSessions = pgTable('import_sessions', {
-  id: uuid('id').primaryKey().defaultRandom(),
+  id: text('id').primaryKey(), // Using text for nanoid
   userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  source: text('source').notNull(), // 'chatgpt', 'claude', 'cline', 'cursor', 'gemini', 'file'
-  status: text('status').default('pending'), // 'pending', 'processing', 'completed', 'failed'
-  importedCount: integer('imported_count').default(0),
-  skippedCount: integer('skipped_count').default(0),
-  processedCount: integer('processed_count').default(0),
-  totalCount: integer('total_count').default(0),
+  platform: text('platform').notNull(), // 'chatgpt', 'claude', 'cline', 'cursor', 'gemini'
+  status: text('status').notNull().default('pending'), // 'pending', 'processing', 'completed', 'failed'
+  fileName: text('file_name').notNull(),
+  fileSize: integer('file_size').notNull(),
+  fileType: text('file_type').notNull(),
+  blobUrl: text('blob_url'),
+  totalPrompts: integer('total_prompts').notNull().default(0),
+  processedPrompts: integer('processed_prompts').notNull().default(0),
+  failedPrompts: integer('failed_prompts').notNull().default(0),
   error: text('error'),
-  results: jsonb('results'),
   metadata: jsonb('metadata'),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+  startedAt: timestamp('started_at').notNull().defaultNow(),
+  completedAt: timestamp('completed_at'),
 }, (table) => {
   return {
     userIdIdx: index('import_sessions_user_id_idx').on(table.userId),
-    sourceIdx: index('import_sessions_source_idx').on(table.source),
+    platformIdx: index('import_sessions_platform_idx').on(table.platform),
     statusIdx: index('import_sessions_status_idx').on(table.status),
-    updatedAtIdx: index('import_sessions_updated_at_idx').on(table.updatedAt),
+    startedAtIdx: index('import_sessions_started_at_idx').on(table.startedAt),
   };
 });
 

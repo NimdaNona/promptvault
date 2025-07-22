@@ -1,73 +1,68 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useDropzone } from "react-dropzone";
+import { useState } from 'react';
+import { ImportDialog } from '@/components/import/import-dialog';
+import { Button } from '@/components/ui/button';
+import { Upload } from 'lucide-react';
 
 export default function TestImportPage() {
-  const [files, setFiles] = useState<File[]>([]);
-  const [content, setContent] = useState<string>("");
-
-  const onDrop = async (acceptedFiles: File[]) => {
-    console.log("onDrop called with files:", acceptedFiles);
-    setFiles(acceptedFiles);
-    
-    if (acceptedFiles.length > 0) {
-      const file = acceptedFiles[0];
-      try {
-        const text = await file.text();
-        setContent(text);
-        console.log("File content:", text);
-      } catch (error) {
-        console.error("Error reading file:", error);
-      }
-    }
-  };
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      'application/json': ['.json'],
-      'text/plain': ['.txt', '.jsonl'],
-    },
-  });
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">Test Import Functionality</h1>
-      
-      <div
-        {...getRootProps()}
-        className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
-          ${isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}
-        `}
-      >
-        <input {...getInputProps()} />
-        <p>
-          {isDragActive
-            ? "Drop the files here..."
-            : "Drag 'n' drop some files here, or click to select files"}
+    <div className="container mx-auto py-10">
+      <div className="max-w-2xl mx-auto">
+        <h1 className="text-3xl font-bold mb-4">Import Test Page</h1>
+        <p className="text-gray-600 mb-8">
+          Test the new import infrastructure for AI Prompt Vault. This page demonstrates
+          the complete import flow including file upload, background processing, and
+          real-time progress tracking.
         </p>
+
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-xl font-semibold mb-4">Import Your Prompts</h2>
+          <p className="text-gray-600 mb-6">
+            Click the button below to import prompts from ChatGPT, Claude, Gemini, Cline, or Cursor.
+            Files up to 500MB are supported.
+          </p>
+
+          <Button
+            onClick={() => setDialogOpen(true)}
+            size="lg"
+            className="w-full sm:w-auto"
+          >
+            <Upload className="mr-2 h-4 w-4" />
+            Import Prompts
+          </Button>
+        </div>
+
+        <div className="mt-8 bg-blue-50 rounded-lg p-6">
+          <h3 className="font-semibold text-blue-900 mb-2">Features Demonstrated:</h3>
+          <ul className="space-y-2 text-blue-800">
+            <li className="flex items-start">
+              <span className="mr-2">•</span>
+              <span>Client-side file upload with Vercel Blob (up to 500MB)</span>
+            </li>
+            <li className="flex items-start">
+              <span className="mr-2">•</span>
+              <span>Background processing with QStash message queue</span>
+            </li>
+            <li className="flex items-start">
+              <span className="mr-2">•</span>
+              <span>Real-time progress tracking with Server-Sent Events</span>
+            </li>
+            <li className="flex items-start">
+              <span className="mr-2">•</span>
+              <span>AI-powered prompt categorization and tagging</span>
+            </li>
+            <li className="flex items-start">
+              <span className="mr-2">•</span>
+              <span>Platform-specific parsers for all major LLMs</span>
+            </li>
+          </ul>
+        </div>
+
+        <ImportDialog open={dialogOpen} onOpenChange={setDialogOpen} />
       </div>
-
-      {files.length > 0 && (
-        <div className="mt-4">
-          <h2 className="font-bold">Files:</h2>
-          {files.map((file, index) => (
-            <div key={index}>
-              <p>{file.name} - {file.size} bytes</p>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {content && (
-        <div className="mt-4">
-          <h2 className="font-bold">Content Preview:</h2>
-          <pre className="bg-gray-100 p-4 rounded overflow-auto max-h-96">
-            {content.substring(0, 1000)}...
-          </pre>
-        </div>
-      )}
     </div>
   );
 }
