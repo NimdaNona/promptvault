@@ -151,7 +151,7 @@ function getExportInstructions(platform: ImportPlatform) {
     chatgpt: (
       <ol className="text-sm text-gray-600 space-y-1 list-decimal list-inside">
         <li>Go to ChatGPT Settings → Data controls</li>
-        <li>Click "Export data"</li>
+        <li>Click &quot;Export data&quot;</li>
         <li>Wait for the email with your export</li>
         <li>Download and extract the ZIP file</li>
         <li>Upload the conversations.json file here</li>
@@ -160,7 +160,7 @@ function getExportInstructions(platform: ImportPlatform) {
     claude: (
       <ol className="text-sm text-gray-600 space-y-1 list-decimal list-inside">
         <li>Go to Claude Settings → Account</li>
-        <li>Click "Export conversations"</li>
+        <li>Click &quot;Export conversations&quot;</li>
         <li>Download the JSON file</li>
         <li>Upload the file here</li>
       </ol>
@@ -168,7 +168,7 @@ function getExportInstructions(platform: ImportPlatform) {
     gemini: (
       <ol className="text-sm text-gray-600 space-y-1 list-decimal list-inside">
         <li>Go to Google Takeout</li>
-        <li>Select "Gemini" or "Bard"</li>
+        <li>Select &quot;Gemini&quot; or &quot;Bard&quot;</li>
         <li>Export and download your data</li>
         <li>Upload the conversations file here</li>
       </ol>

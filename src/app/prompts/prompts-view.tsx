@@ -252,7 +252,7 @@ export default function PromptsView({ userId, userTier, promptCount }: PromptsVi
           <CardContent className="text-center py-8">
             <h3 className="text-lg font-semibold mb-2">Prompt Limit Reached</h3>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
-              You've reached the limit of {tierLimits.prompts} prompts on the {userTier} plan.
+              You&apos;ve reached the limit of {tierLimits.prompts} prompts on the {userTier} plan.
             </p>
             <Button onClick={() => router.push("/settings/billing")}>
               Upgrade to Pro

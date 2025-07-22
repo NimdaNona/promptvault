@@ -100,7 +100,7 @@ export default function OptimizePromptView({ prompt }: OptimizePromptViewProps) 
           Optimize Prompt
         </h1>
         <p className="mt-2 text-gray-600 dark:text-gray-400">
-          Use AI to improve your prompt's effectiveness
+          Use AI to improve your prompt&apos;s effectiveness
         </p>
       </div>
 

@@ -211,7 +211,7 @@ export function UploadComponent({ platform, onUploadComplete, onError }: UploadC
         <Alert>
           <AlertDescription>
             Your file is being processed in the background. You can navigate away from this page.
-            We'll notify you when the import is complete.
+            We&apos;ll notify you when the import is complete.
           </AlertDescription>
         </Alert>
       ) : null}

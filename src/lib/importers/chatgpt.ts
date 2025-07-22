@@ -35,6 +35,57 @@ export interface ChatGPTExport {
   user?: any;
 }
 
+// Legacy function exports for backward compatibility
+export function validateChatGPTExport(content: string): boolean {
+  try {
+    const data = JSON.parse(content);
+    return !!(data && Array.isArray(data.conversations));
+  } catch {
+    return false;
+  }
+}
+
+export function parseChatGPTExport(content: string): any[] {
+  const parser = new ChatGPTParser();
+  // Use sync version for backward compatibility
+  try {
+    const data: ChatGPTExport = JSON.parse(content);
+    const prompts: any[] = [];
+
+    for (const conversation of data.conversations) {
+      if (conversation.mapping) {
+        const nodes = Object.values(conversation.mapping);
+        
+        for (const node of nodes) {
+          if (node.message && node.message.author?.role === 'user') {
+            const userMessage = node.message as ChatGPTMessage;
+            const content = userMessage.content?.parts?.join('\n') || '';
+            
+            if (content.trim()) {
+              prompts.push({
+                title: conversation.title,
+                content: content,
+                metadata: {
+                  source: 'chatgpt',
+                  conversationId: conversation.id,
+                  conversationTitle: conversation.title,
+                  timestamp: conversation.create_time * 1000,
+                  model: node.message?.metadata?.model_slug
+                }
+              });
+            }
+          }
+        }
+      }
+    }
+
+    return prompts;
+  } catch (error) {
+    console.error('Failed to parse ChatGPT export:', error);
+    return [];
+  }
+}
+
 export class ChatGPTParser {
   async parse(content: string): Promise<ParsedPrompt[]> {
     try {

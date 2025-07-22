@@ -69,7 +69,7 @@ export default function AnalyticsPage() {
             Analytics Coming Soon
           </h3>
           <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-            We're building powerful analytics to help you understand how your prompts perform
+            We&apos;re building powerful analytics to help you understand how your prompts perform
             and how your team uses them. Stay tuned!
           </p>
         </CardContent>
