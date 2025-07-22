@@ -1,0 +1,65 @@
+[19:25:52.069] Running build in Washington, D.C., USA (East) – iad1
+[19:25:52.070] Build machine configuration: 4 cores, 8 GB
+[19:25:52.087] Cloning github.com/NimdaNona/promptvault (Branch: main, Commit: 3a58198)
+[19:25:52.441] Cloning completed: 354.000ms
+[19:25:55.465] Restored build cache from previous deployment (GYB3C9sGW8TyeNjf5U2Tx7KHLWt9)
+[19:25:56.287] Running "vercel build"
+[19:25:57.129] Vercel CLI 44.5.0
+[19:25:57.317] Detected OpenTelemetry dependency: @vercel/otel@1.13.0, which meets the minimum version requirement of 1.11.0
+[19:25:57.708] Running "install" command: `npm install`...
+[19:26:00.247] 
+[19:26:00.248] added 13 packages, and audited 776 packages in 2s
+[19:26:00.248] 
+[19:26:00.248] 186 packages are looking for funding
+[19:26:00.248]   run `npm fund` for details
+[19:26:00.266] 
+[19:26:00.266] 4 moderate severity vulnerabilities
+[19:26:00.266] 
+[19:26:00.267] To address all issues (including breaking changes), run:
+[19:26:00.267]   npm audit fix --force
+[19:26:00.267] 
+[19:26:00.267] Run `npm audit` for details.
+[19:26:00.300] Detected Next.js version: 15.4.1
+[19:26:00.301] Running "npm run build"
+[19:26:00.426] 
+[19:26:00.427] > promptvault@0.1.0 build
+[19:26:00.427] > next build
+[19:26:00.427] 
+[19:26:01.879]    ▲ Next.js 15.4.1
+[19:26:01.879] 
+[19:26:01.922]    Creating an optimized production build ...
+[19:26:15.124] Failed to compile.
+[19:26:15.124] 
+[19:26:15.124] ./src/app/import/page.tsx
+[19:26:15.124] Module not found: Can't resolve '@/components/ui/card'
+[19:26:15.125] 
+[19:26:15.125] https://nextjs.org/docs/messages/module-not-found
+[19:26:15.125] 
+[19:26:15.125] ./src/app/import/page.tsx
+[19:26:15.125] Module not found: Can't resolve '@/components/ui/badge'
+[19:26:15.125] 
+[19:26:15.125] https://nextjs.org/docs/messages/module-not-found
+[19:26:15.125] 
+[19:26:15.125] ./src/app/team/page.tsx
+[19:26:15.125] Module not found: Can't resolve '@/components/ui/card'
+[19:26:15.125] 
+[19:26:15.125] https://nextjs.org/docs/messages/module-not-found
+[19:26:15.125] 
+[19:26:15.125] ./src/app/team/page.tsx
+[19:26:15.125] Module not found: Can't resolve '@/components/ui/badge'
+[19:26:15.125] 
+[19:26:15.125] https://nextjs.org/docs/messages/module-not-found
+[19:26:15.125] 
+[19:26:15.125] ./src/components/import/import-dialog.tsx
+[19:26:15.125] Module not found: Can't resolve '@/components/ui/dialog'
+[19:26:15.125] 
+[19:26:15.126] https://nextjs.org/docs/messages/module-not-found
+[19:26:15.126] 
+[19:26:15.126] Import trace for requested module:
+[19:26:15.126] ./src/app/test-import/page.tsx
+[19:26:15.126] 
+[19:26:15.130] 
+[19:26:15.131] > Build failed because of webpack errors
+[19:26:15.160] Error: Command "npm run build" exited with 1
+[19:26:15.572] 
+[19:26:18.356] Exiting build container
