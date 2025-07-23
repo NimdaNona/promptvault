@@ -18,7 +18,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const jsonResponse = await handleUpload({
       body,
       request,
-      onBeforeGenerateToken: async (pathname, clientPayload) => {
+      onBeforeGenerateToken: async (
+        pathname: string,
+        clientPayload?: string | null,
+        multipart?: boolean
+      ) => {
         // Validate the upload request
         const payload = JSON.parse(clientPayload || '{}');
         
@@ -40,7 +44,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         return {
           allowedContentTypes: ['application/json', 'text/plain', 'text/markdown', 'text/csv'],
           maximumSizeInBytes: 500 * 1024 * 1024, // 500MB
-          validUntil: new Date(Date.now() + 60 * 60 * 1000).toISOString(), // 1 hour
+          validUntil: Date.now() + 60 * 60 * 1000, // 1 hour from now (timestamp in milliseconds)
         };
       },
       onUploadCompleted: async ({ blob, tokenPayload }) => {
