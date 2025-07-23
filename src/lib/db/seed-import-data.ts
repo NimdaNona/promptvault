@@ -24,25 +24,29 @@ async function seedImportData() {
 
     // Create test import sessions
     const [clineImportSession] = await db.insert(importSessions).values({
+      id: `import_${Date.now()}_cline`,
       userId: testUser.id,
-      source: 'cline',
+      platform: 'cline',
       status: 'completed',
-      importedCount: 5,
-      skippedCount: 2,
-      processedCount: 7,
-      totalCount: 7,
+      fileName: 'cline-export.json',
+      fileSize: 45678,
+      fileType: 'application/json',
+      totalPrompts: 7,
+      processedPrompts: 5,
+      failedPrompts: 2,
       metadata: {
         fileCount: 3,
         totalSize: 45678,
         processingTime: 3456,
-        completedAt: new Date().toISOString()
+        completedAt: new Date().toISOString(),
+        results: {
+          imported: 5,
+          skipped: 2,
+          errors: [],
+          warnings: ['2 duplicate prompts detected and skipped']
+        }
       },
-      results: {
-        imported: 5,
-        skipped: 2,
-        errors: [],
-        warnings: ['2 duplicate prompts detected and skipped']
-      }
+      completedAt: new Date()
     }).returning();
 
     console.log("✅ Created Cline import session");
@@ -209,27 +213,34 @@ async function seedImportData() {
     // Create another import session for different sources
     await db.insert(importSessions).values([
       {
+        id: `import_${Date.now()}_chatgpt`,
         userId: testUser.id,
-        source: 'chatgpt',
+        platform: 'chatgpt',
         status: 'completed',
-        importedCount: 12,
-        skippedCount: 3,
-        processedCount: 15,
-        totalCount: 15,
+        fileName: 'conversations.json',
+        fileSize: 123456,
+        fileType: 'application/json',
+        totalPrompts: 15,
+        processedPrompts: 12,
+        failedPrompts: 3,
         metadata: {
           fileCount: 1,
           totalSize: 123456,
           processingTime: 5678
-        }
+        },
+        completedAt: new Date()
       },
       {
+        id: `import_${Date.now() + 1}_claude`,
         userId: testUser.id,
-        source: 'claude',
+        platform: 'claude',
         status: 'failed',
-        importedCount: 0,
-        skippedCount: 0,
-        processedCount: 0,
-        totalCount: 10,
+        fileName: 'claude-export.json',
+        fileSize: 34567,
+        fileType: 'application/json',
+        totalPrompts: 10,
+        processedPrompts: 0,
+        failedPrompts: 0,
         error: 'Invalid file format',
         metadata: {
           fileCount: 1,
