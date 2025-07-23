@@ -27,18 +27,18 @@ export interface ImportedPrompt {
 export interface ImportSession {
   id: string;
   userId: string;
-  source: ImportSource;
-  importedCount: number;
-  skippedCount: number;
+  platform: ImportSource;
+  processedPrompts: number;
+  failedPrompts: number;
   metadata: any;
-  createdAt: Date;
+  startedAt: Date;
 }
 
 export interface ImportProgress {
   total: number;
   processed: number;
   imported: number;
-  skipped: number;
+  failed: number;
   errors: string[];
   status: 'processing' | 'complete' | 'error';
   summary?: ImportSummary;
@@ -57,23 +57,30 @@ export async function createImportSession(
   source: ImportSource,
   metadata: any
 ): Promise<ImportSession> {
+  const sessionId = `import_${Date.now()}_${nanoid(6)}`;
   const [session] = await db.insert(importSessions).values({
+    id: sessionId,
     userId,
-    source,
+    platform: source,
+    status: 'pending',
+    fileName: metadata.fileName || 'unknown.json',
+    fileSize: metadata.fileSize || 0,
+    fileType: metadata.fileType || 'application/json',
+    totalPrompts: 0,
+    processedPrompts: 0,
+    failedPrompts: 0,
     metadata,
-    importedCount: 0,
-    skippedCount: 0,
-    createdAt: new Date()
+    startedAt: new Date()
   }).returning();
   
   return {
     id: session.id,
     userId: session.userId,
-    source: session.source as ImportSource,
-    importedCount: session.importedCount || 0,
-    skippedCount: session.skippedCount || 0,
+    platform: session.platform as ImportSource,
+    processedPrompts: session.processedPrompts || 0,
+    failedPrompts: session.failedPrompts || 0,
     metadata: session.metadata,
-    createdAt: session.createdAt
+    startedAt: session.startedAt
   };
 }
 
@@ -82,17 +89,27 @@ export async function updateImportSession(
   sessionId: string,
   update: {
     status?: 'pending' | 'processing' | 'completed' | 'failed';
-    importedCount?: number;
-    skippedCount?: number;
-    processedCount?: number;
-    totalCount?: number;
+    totalPrompts?: number;
+    processedPrompts?: number;
+    failedPrompts?: number;
     error?: string;
     metadata?: any;
-    results?: any;
+    completedAt?: Date;
   }
 ): Promise<void> {
+  const updateData: any = {};
+  
+  // Map the fields to match the database schema
+  if (update.status !== undefined) updateData.status = update.status;
+  if (update.totalPrompts !== undefined) updateData.totalPrompts = update.totalPrompts;
+  if (update.processedPrompts !== undefined) updateData.processedPrompts = update.processedPrompts;
+  if (update.failedPrompts !== undefined) updateData.failedPrompts = update.failedPrompts;
+  if (update.error !== undefined) updateData.error = update.error;
+  if (update.metadata !== undefined) updateData.metadata = update.metadata;
+  if (update.completedAt !== undefined) updateData.completedAt = update.completedAt;
+  
   await db.update(importSessions)
-    .set(update)
+    .set(updateData)
     .where(eq(importSessions.id, sessionId));
 }
 

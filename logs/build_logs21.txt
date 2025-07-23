@@ -1,0 +1,64 @@
+[00:00:38.017] Running build in Washington, D.C., USA (East) – iad1
+[00:00:38.018] Build machine configuration: 4 cores, 8 GB
+[00:00:38.042] Cloning github.com/NimdaNona/promptvault (Branch: main, Commit: d83a72b)
+[00:00:38.390] Cloning completed: 347.000ms
+[00:00:42.112] Restored build cache from previous deployment (GYB3C9sGW8TyeNjf5U2Tx7KHLWt9)
+[00:00:43.129] Running "vercel build"
+[00:00:43.922] Vercel CLI 44.5.0
+[00:00:44.162] Detected OpenTelemetry dependency: @vercel/otel@1.13.0, which meets the minimum version requirement of 1.11.0
+[00:00:44.514] Running "install" command: `npm install`...
+[00:00:47.582] 
+[00:00:47.583] added 44 packages, and audited 807 packages in 3s
+[00:00:47.583] 
+[00:00:47.583] 187 packages are looking for funding
+[00:00:47.583]   run `npm fund` for details
+[00:00:47.607] 
+[00:00:47.607] 4 moderate severity vulnerabilities
+[00:00:47.607] 
+[00:00:47.607] To address all issues (including breaking changes), run:
+[00:00:47.607]   npm audit fix --force
+[00:00:47.607] 
+[00:00:47.607] Run `npm audit` for details.
+[00:00:47.649] Detected Next.js version: 15.4.1
+[00:00:47.650] Running "npm run build"
+[00:00:47.786] 
+[00:00:47.786] > promptvault@0.1.0 build
+[00:00:47.787] > next build
+[00:00:47.787] 
+[00:00:49.184]    ▲ Next.js 15.4.1
+[00:00:49.185] 
+[00:00:49.231]    Creating an optimized production build ...
+[00:01:07.770] <w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (150kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+[00:01:15.145]  ✓ Compiled successfully in 22.0s
+[00:01:15.153]    Linting and checking validity of types ...
+[00:01:20.601] 
+[00:01:20.601] ./src/app/prompts/prompts-view.tsx
+[00:01:20.602] 52:6  Warning: React Hook useEffect has a missing dependency: 'fetchPrompts'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+[00:01:20.602] 
+[00:01:20.605] ./src/app/settings/profile/profile-form.tsx
+[00:01:20.605] 73:15  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+[00:01:20.605] 
+[00:01:20.605] ./src/app/team/page.tsx
+[00:01:20.605] 84:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+[00:01:20.606] 
+[00:01:20.606] info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+[00:01:30.530] Failed to compile.
+[00:01:30.530] 
+[00:01:30.530] ./src/lib/import/utils.ts:60:53
+[00:01:30.530] Type error: No overload matches this call.
+[00:01:30.531]   Overload 1 of 2, '(value: { id: string | SQL<unknown> | Placeholder<string, any>; userId: string | SQL<unknown> | Placeholder<string, any>; platform: string | SQL<unknown> | Placeholder<...>; ... 11 more ...; completedAt?: SQL<...> | ... 3 more ... | undefined; }): PgInsertBase<...>', gave the following error.
+[00:01:30.531]     Object literal may only specify known properties, and 'source' does not exist in type '{ id: string | SQL<unknown> | Placeholder<string, any>; userId: string | SQL<unknown> | Placeholder<string, any>; platform: string | SQL<unknown> | Placeholder<string, any>; ... 11 more ...; completedAt?: SQL<...> | ... 3 more ... | undefined; }'.
+[00:01:30.531]   Overload 2 of 2, '(values: { id: string | SQL<unknown> | Placeholder<string, any>; userId: string | SQL<unknown> | Placeholder<string, any>; platform: string | SQL<unknown> | Placeholder<...>; ... 11 more ...; completedAt?: SQL<...> | ... 3 more ... | undefined; }[]): PgInsertBase<...>', gave the following error.
+[00:01:30.532]     Object literal may only specify known properties, and 'userId' does not exist in type '{ id: string | SQL<unknown> | Placeholder<string, any>; userId: string | SQL<unknown> | Placeholder<string, any>; platform: string | SQL<unknown> | Placeholder<string, any>; ... 11 more ...; completedAt?: SQL<...> | ... 3 more ... | undefined; }[]'.
+[00:01:30.532] 
+[00:01:30.532] [0m [90m 58 |[39m   metadata[33m:[39m any
+[00:01:30.532]  [90m 59 |[39m )[33m:[39m [33mPromise[39m[33m<[39m[33mImportSession[39m[33m>[39m {
+[00:01:30.532] [31m[1m>[22m[39m[90m 60 |[39m   [36mconst[39m [session] [33m=[39m [36mawait[39m db[33m.[39minsert(importSessions)[33m.[39mvalues({
+[00:01:30.532]  [90m    |[39m                                                     [31m[1m^[22m[39m
+[00:01:30.532]  [90m 61 |[39m     userId[33m,[39m
+[00:01:30.532]  [90m 62 |[39m     source[33m,[39m
+[00:01:30.532]  [90m 63 |[39m     metadata[33m,[39m[0m
+[00:01:30.586] Next.js build worker exited with code: 1 and signal: null
+[00:01:30.616] Error: Command "npm run build" exited with 1
+[00:01:31.027] 
+[00:01:34.537] Exiting build container

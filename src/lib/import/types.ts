@@ -4,17 +4,19 @@ export type ImportSource = 'chatgpt' | 'claude' | 'gemini' | 'cline' | 'cursor' 
 export interface ImportSession {
   id: string;
   userId: string;
-  source: ImportSource;
+  platform: ImportSource;
   status: 'pending' | 'processing' | 'completed' | 'failed';
-  importedCount: number;
-  skippedCount: number;
-  processedCount?: number;
-  totalCount?: number;
+  fileName: string;
+  fileSize: number;
+  fileType: string;
+  blobUrl?: string;
+  totalPrompts: number;
+  processedPrompts: number;
+  failedPrompts: number;
   error?: string;
   metadata?: any;
-  results?: ImportResults;
-  createdAt: Date;
-  updatedAt: Date;
+  startedAt: Date;
+  completedAt?: Date;
 }
 
 export interface ImportResults {
