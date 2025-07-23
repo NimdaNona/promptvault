@@ -45,10 +45,20 @@ export default async function OptimizePromptPage({
     redirect("/dashboard");
   }
 
+  // Transform the prompt to match the expected interface
+  const promptForView = {
+    id: prompt.id,
+    title: prompt.name, // Map 'name' to 'title'
+    content: prompt.content,
+    description: prompt.description,
+    category: prompt.folder, // Map 'folder' to 'category' if that's the intent
+    tags: null, // We don't have tags loaded here
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <OptimizePromptView prompt={prompt} />
+        <OptimizePromptView prompt={promptForView} />
       </div>
     </div>
   );
