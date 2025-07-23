@@ -22,11 +22,18 @@ export async function POST(req: Request) {
     }
 
     // Create import session
+    const sessionId = `import-${Date.now()}-${Math.random().toString(36).substring(7)}`;
     const [importSession] = await db.insert(importSessions).values({
+      id: sessionId,
       userId,
-      source: source || 'file',
-      importedCount: 0,
-      skippedCount: 0,
+      platform: source || 'file',
+      status: 'processing',
+      fileName: 'bulk-import.json',
+      fileSize: JSON.stringify(importPrompts).length,
+      fileType: 'application/json',
+      totalPrompts: importPrompts.length,
+      processedPrompts: 0,
+      failedPrompts: 0,
       metadata: {},
     }).returning();
 
@@ -67,8 +74,10 @@ export async function POST(req: Request) {
       // Update import session with results
       await tx.update(importSessions)
         .set({
-          importedCount: imported,
-          skippedCount: skipped,
+          status: 'completed',
+          processedPrompts: imported,
+          failedPrompts: skipped,
+          completedAt: new Date(),
           metadata: {
             totalProcessed: importPrompts.length,
             completedAt: new Date().toISOString(),
