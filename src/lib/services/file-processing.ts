@@ -96,11 +96,12 @@ export class FileProcessingService {
 
         // Save to database
         await db.transaction(async (tx) => {
+          const now = new Date();
+          
           for (const categorizedPrompt of categorizedBatch) {
             try {
               // Create prompt
-              const promptId = nanoid();
-              const now = new Date();
+              const promptId = crypto.randomUUID();
 
               await tx.insert(prompts).values({
                 id: promptId,
@@ -147,14 +148,15 @@ export class FileProcessingService {
 
                   // Create tag if it doesn't exist
                   if (!tag) {
-                    const tagId = nanoid();
-                    await tx.insert(tags).values({
-                      id: tagId,
+                    const newTag = {
+                      id: crypto.randomUUID(),
                       name: tagName,
                       userId,
+                      color: '#3B82F6',
                       createdAt: now
-                    });
-                    tag = { id: tagId };
+                    };
+                    await tx.insert(tags).values(newTag);
+                    tag = newTag;
                   }
 
                   // Link prompt to tag

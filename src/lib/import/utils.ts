@@ -149,6 +149,7 @@ export async function createTagsForPrompt(
     
     if (!tag) {
       const [newTag] = await db.insert(tags).values({
+        id: crypto.randomUUID(),
         name: tagName,
         userId,
         color: generateTagColor(tagName)

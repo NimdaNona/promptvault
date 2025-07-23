@@ -153,6 +153,7 @@ export async function POST(req: Request) {
             const [newTag] = await tx
               .insert(tags)
               .values({
+                id: crypto.randomUUID(),
                 name: tagName,
                 userId,
               })

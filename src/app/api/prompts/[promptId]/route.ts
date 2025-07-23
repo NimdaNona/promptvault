@@ -150,6 +150,7 @@ export async function PATCH(
             const [newTag] = await tx
               .insert(tags)
               .values({
+                id: crypto.randomUUID(),
                 name: tagName,
                 userId,
               })
