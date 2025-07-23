@@ -159,14 +159,38 @@ export class ClineMarkdownParser {
     let inConversation = false;
     let messageBuffer: string[] = [];
     let currentRole: 'user' | 'assistant' | null = null;
+    let metadata: Record<string, any> = {};
+    let inMetadata = false;
     
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       const trimmedLine = line.trim();
       
-      // Extract title from # Task header
-      if (trimmedLine.startsWith('# Task')) {
-        title = trimmedLine.replace('# Task', '').trim() || 'Cline Task';
+      // Extract title from # header (more flexible)
+      if (trimmedLine.startsWith('# ') && !title) {
+        title = trimmedLine.replace(/^#\s*/, '').replace(/^Task\s*/i, '').trim() || 'Cline Task';
+        continue;
+      }
+      
+      // Handle metadata section (YAML-like format)
+      if (trimmedLine === '---') {
+        if (!inMetadata) {
+          inMetadata = true;
+          continue;
+        } else {
+          inMetadata = false;
+          continue;
+        }
+      }
+      
+      if (inMetadata) {
+        const [key, value] = trimmedLine.split(':').map(s => s.trim());
+        if (key && value) {
+          if (key === 'model') metadata.model = value;
+          else if (key === 'totalTokens') metadata.totalTokens = parseInt(value);
+          else if (key === 'cost') metadata.cost = parseFloat(value);
+          else if (key === 'duration') metadata.duration = parseInt(value);
+        }
         continue;
       }
       
@@ -194,6 +218,12 @@ export class ClineMarkdownParser {
       if (trimmedLine === '## Conversation') {
         inConversation = true;
         continue;
+      }
+      
+      // Also start conversation if we see message markers without explicit section
+      if (!inConversation && (trimmedLine === '### Human' || trimmedLine === '### User' || 
+          trimmedLine === '### Assistant' || trimmedLine === '### Cline')) {
+        inConversation = true;
       }
       
       // Stop parsing at Additional Context or other sections
@@ -256,11 +286,8 @@ export class ClineMarkdownParser {
       title: title || summary || 'Cline Task',
       timestamp: timestamp || new Date().toISOString(),
       messages,
-      metadata: {}
+      metadata: { ...this.extractMetadata({ id, title, timestamp, messages, metadata: {} }), ...metadata }
     };
-    
-    // Extract metadata
-    task.metadata = this.extractMetadata(task);
     
     try {
       return ClineTaskSchema.parse(task);

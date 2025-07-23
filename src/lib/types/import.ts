@@ -41,4 +41,10 @@ export interface ImportProgress {
   totalPrompts?: number;
   processedPrompts?: number;
   errors?: string[];
+  performance?: {
+    throughput: number;
+    memoryUsage?: number;
+    averageProcessingTime?: number;
+  };
+  metadata?: Record<string, any>;
 }

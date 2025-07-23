@@ -153,7 +153,7 @@ export function UploadComponent({ platform, onUploadComplete, onError }: UploadC
               htmlFor="file-upload"
               className={`cursor-pointer ${isUploading ? 'opacity-50' : ''}`}
             >
-              <Button variant="outline" disabled={isUploading}>
+              <Button variant="outline" disabled={isUploading} data-upload-trigger>
                 Choose File
               </Button>
             </label>

@@ -13,6 +13,12 @@ export interface ProgressUpdate {
     extractedCount?: number;
     errors?: string[];
     currentFile?: string;
+    [key: string]: any;
+  };
+  performance?: {
+    throughput: number;
+    memoryUsage?: number;
+    averageProcessingTime?: number;
   };
 }
 

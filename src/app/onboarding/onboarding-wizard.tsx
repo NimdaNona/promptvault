@@ -11,6 +11,7 @@ interface OnboardingWizardProps {
   userId: string;
   email: string;
   name: string;
+  clineImportEnabled?: boolean;
 }
 
 type UserType = "developer" | "marketer" | "researcher" | "writer" | "other";
@@ -34,7 +35,7 @@ const IMPORT_SOURCES = [
   { id: "none" as ImportSource, label: "Skip Import", description: "Start fresh without importing" },
 ];
 
-export default function OnboardingWizard({ userId, email, name }: OnboardingWizardProps) {
+export default function OnboardingWizard({ userId, email, name, clineImportEnabled = false }: OnboardingWizardProps) {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [userType, setUserType] = useState<UserType | null>(null);
@@ -224,7 +225,9 @@ export default function OnboardingWizard({ userId, email, name }: OnboardingWiza
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {IMPORT_SOURCES.map((source) => (
+              {IMPORT_SOURCES.filter(source => 
+                source.id !== 'cline' || clineImportEnabled
+              ).map((source) => (
                 <button
                   key={source.id}
                   onClick={() => handleImportSelect(source.id)}

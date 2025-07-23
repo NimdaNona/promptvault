@@ -107,7 +107,7 @@ Respond with a JSON array where each object has: title, description, category, t
         const meta = metadata[index] || {};
         return {
           ...prompt,
-          title: meta.title || 'Untitled Prompt',
+          title: meta.title || prompt.metadata?.title || 'Untitled Prompt',
           description: meta.description || '',
           category: this.validateCategory(meta.category),
           tags: this.validateTags(meta.tags || [])
@@ -119,7 +119,7 @@ Respond with a JSON array where each object has: title, description, category, t
       // Fallback to basic categorization
       return prompts.map(prompt => ({
         ...prompt,
-        title: this.generateBasicTitle(prompt.content),
+        title: prompt.metadata?.title || this.generateBasicTitle(prompt.content),
         description: 'Imported prompt',
         category: 'other',
         tags: []

@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import OnboardingWizard from "./onboarding-wizard";
+import { checkFeatureFlag } from "@/lib/features/flags";
 
 export default async function OnboardingPage() {
   const { userId } = await auth();
@@ -22,11 +23,15 @@ export default async function OnboardingPage() {
     redirect("/dashboard");
   }
 
+  // Check feature flags
+  const clineImportEnabled = await checkFeatureFlag('cline_import', userId);
+
   return (
     <OnboardingWizard 
       userId={userId} 
       email={clerkUser.emailAddresses[0]?.emailAddress || ""} 
       name={`${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim()}
+      clineImportEnabled={clineImportEnabled}
     />
   );
 }

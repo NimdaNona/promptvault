@@ -156,6 +156,12 @@ export async function POST(request: NextRequest) {
       }
     );
 
+    // Import analytics
+    const { ClineImportAnalytics } = await import('@/lib/analytics/cline-import-analytics');
+    
+    // Initialize analytics session
+    ClineImportAnalytics.startSession(session.id, user.id, 'file');
+
     // Update progress
     importProgress.updateProgress(session.id, {
       status: 'processing',
@@ -214,6 +220,14 @@ export async function POST(request: NextRequest) {
         failedPrompts: extractedPrompts.length - processedPrompts.length,
       });
 
+      // Complete analytics session
+      ClineImportAnalytics.updateSession(session.id, {
+        filesProcessed: files.length,
+        promptsImported: processedPrompts.length,
+        duplicatesRemoved: extractedPrompts.length - processedPrompts.length,
+      });
+      ClineImportAnalytics.completeSession(session.id, true);
+
       importProgress.updateProgress(session.id, {
         status: 'completed',
         progress: 100,
@@ -243,6 +257,12 @@ export async function POST(request: NextRequest) {
         status: 'failed',
         error: error instanceof Error ? error.message : 'Unknown error',
       });
+
+      // Complete analytics session with failure
+      ClineImportAnalytics.updateSession(session.id, {
+        errorsEncountered: 1,
+      });
+      ClineImportAnalytics.completeSession(session.id, false);
 
       importProgress.updateProgress(session.id, {
         status: 'failed',

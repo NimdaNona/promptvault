@@ -1,60 +1,69 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FileText, MessageSquare, Brain, Code, Terminal, Upload, CheckCircle, Clock, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-const importOptions = [
-  {
-    id: "chatgpt",
-    name: "ChatGPT",
-    icon: MessageSquare,
-    description: "Import conversations from ChatGPT",
-    href: "/onboarding?tab=chatgpt",
-    status: "available",
-    formats: ["JSON export"]
-  },
-  {
-    id: "claude",
-    name: "Claude",
-    icon: Brain,
-    description: "Import conversations from Claude",
-    href: "/onboarding?tab=claude",
-    status: "available",
-    formats: ["JSON export"]
-  },
-  {
-    id: "gemini",
-    name: "Google Gemini",
-    icon: MessageSquare,
-    description: "Import conversations from Google Gemini",
-    href: "/onboarding?tab=gemini",
-    status: "available",
-    formats: ["JSON export"]
-  },
-  {
-    id: "cline",
-    name: "Cline",
-    icon: Code,
-    description: "Import AI coding sessions from Cline",
-    href: "/onboarding?tab=cline",
-    status: "available",
-    formats: ["JSON export"]
-  },
-  {
-    id: "cursor",
-    name: "Cursor",
-    icon: Terminal,
-    description: "Import AI coding sessions from Cursor",
-    href: "/onboarding?tab=cursor",
-    status: "available",
-    formats: ["JSON export", "Markdown"]
-  }
-];
+import { useAuth } from "@clerk/nextjs";
+import { useFeatureFlag } from "@/lib/features/flags";
 
 export default function ImportPage() {
+  const { userId } = useAuth();
+  const clineImportEnabled = useFeatureFlag('cline_import', userId || undefined);
+  
+  // Base import options that are always available
+  const baseImportOptions = [
+    {
+      id: "chatgpt",
+      name: "ChatGPT",
+      icon: MessageSquare,
+      description: "Import conversations from ChatGPT",
+      href: "/onboarding?tab=chatgpt",
+      status: "available",
+      formats: ["JSON export"]
+    },
+    {
+      id: "claude",
+      name: "Claude",
+      icon: Brain,
+      description: "Import conversations from Claude",
+      href: "/onboarding?tab=claude",
+      status: "available",
+      formats: ["JSON export"]
+    },
+    {
+      id: "gemini",
+      name: "Google Gemini",
+      icon: MessageSquare,
+      description: "Import conversations from Google Gemini",
+      href: "/onboarding?tab=gemini",
+      status: "available",
+      formats: ["JSON export"]
+    },
+    {
+      id: "cursor",
+      name: "Cursor",
+      icon: Terminal,
+      description: "Import AI coding sessions from Cursor",
+      href: "/onboarding?tab=cursor",
+      status: "available",
+      formats: ["JSON export", "Markdown"]
+    }
+  ];
+  
+  // Conditionally add Cline import option based on feature flag
+  const importOptions = clineImportEnabled 
+    ? [...baseImportOptions.slice(0, 3), {
+        id: "cline",
+        name: "Cline",
+        icon: Code,
+        description: "Import AI coding sessions from Cline VSCode extension",
+        href: "/onboarding?tab=cline",
+        status: "available",
+        formats: ["Markdown export", "VSCode storage folder"]
+      }, baseImportOptions[3]]
+    : baseImportOptions;
   const [recentImports, setRecentImports] = useState([
     {
       id: "1",

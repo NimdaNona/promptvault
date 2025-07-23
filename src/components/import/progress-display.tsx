@@ -4,14 +4,21 @@ import { useImportProgress } from '@/hooks/use-import-progress';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CheckCircle, XCircle, Loader2, AlertCircle } from 'lucide-react';
+import { ImportPerformanceMonitor } from './import-performance-monitor';
+import { useState } from 'react';
 
 interface ProgressDisplayProps {
   sessionId: string;
   onComplete?: () => void;
+  showPerformanceMetrics?: boolean;
 }
 
-export function ProgressDisplay({ sessionId, onComplete }: ProgressDisplayProps) {
+export function ProgressDisplay({ sessionId, onComplete, showPerformanceMetrics = false }: ProgressDisplayProps) {
   const { progress, isConnected, error } = useImportProgress(sessionId);
+  const [performanceData, setPerformanceData] = useState<{
+    throughput: number;
+    successRate: number;
+  } | null>(null);
 
   if (!isConnected && !progress) {
     return (
@@ -109,6 +116,40 @@ export function ProgressDisplay({ sessionId, onComplete }: ProgressDisplayProps)
           )}
         </div>
       </div>
+
+      {/* Performance Metrics */}
+      {showPerformanceMetrics && progress.status === 'processing' && (
+        <div className="mt-4">
+          <ImportPerformanceMonitor 
+            sessionId={sessionId}
+            onMetricsUpdate={(metrics) => {
+              setPerformanceData({
+                throughput: metrics.throughput,
+                successRate: metrics.processedCount > 0 
+                  ? ((metrics.processedCount - metrics.errors) / metrics.processedCount) * 100
+                  : 0
+              });
+            }}
+          />
+        </div>
+      )}
+
+      {/* Performance Summary for completed imports */}
+      {showPerformanceMetrics && progress.status === 'completed' && performanceData && (
+        <div className="mt-4 p-3 bg-gray-50 rounded-md">
+          <h4 className="text-sm font-medium text-gray-700 mb-2">Performance Summary</h4>
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div>
+              <span className="text-gray-600">Average Throughput:</span>
+              <span className="ml-2 font-medium">{performanceData.throughput.toFixed(1)} prompts/s</span>
+            </div>
+            <div>
+              <span className="text-gray-600">Success Rate:</span>
+              <span className="ml-2 font-medium">{performanceData.successRate.toFixed(1)}%</span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
