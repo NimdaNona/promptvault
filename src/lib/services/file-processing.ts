@@ -7,7 +7,7 @@ import { CursorParser } from '@/lib/importers/cursor-new';
 import { AICategorizer } from './ai-categorizer';
 import { db } from '@/lib/db';
 import { prompts, promptVersions, tags, promptTags, users } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
 
 interface ProcessFileOptions {
@@ -139,8 +139,10 @@ export class FileProcessingService {
                   let [tag] = await tx
                     .select()
                     .from(tags)
-                    .where(eq(tags.userId, userId))
-                    .where(eq(tags.name, tagName))
+                    .where(and(
+                      eq(tags.userId, userId),
+                      eq(tags.name, tagName)
+                    ))
                     .limit(1);
 
                   // Create tag if it doesn't exist

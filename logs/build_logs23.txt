@@ -1,0 +1,60 @@
+[00:17:34.194] Running build in Washington, D.C., USA (East) – iad1
+[00:17:34.195] Build machine configuration: 4 cores, 8 GB
+[00:17:34.214] Cloning github.com/NimdaNona/promptvault (Branch: main, Commit: f21989b)
+[00:17:34.538] Cloning completed: 324.000ms
+[00:17:37.391] Restored build cache from previous deployment (GYB3C9sGW8TyeNjf5U2Tx7KHLWt9)
+[00:17:39.824] Running "vercel build"
+[00:17:40.326] Vercel CLI 44.5.0
+[00:17:40.478] Detected OpenTelemetry dependency: @vercel/otel@1.13.0, which meets the minimum version requirement of 1.11.0
+[00:17:40.666] Running "install" command: `npm install`...
+[00:17:43.197] 
+[00:17:43.197] added 44 packages, and audited 807 packages in 2s
+[00:17:43.197] 
+[00:17:43.197] 187 packages are looking for funding
+[00:17:43.197]   run `npm fund` for details
+[00:17:43.214] 
+[00:17:43.214] 4 moderate severity vulnerabilities
+[00:17:43.214] 
+[00:17:43.214] To address all issues (including breaking changes), run:
+[00:17:43.215]   npm audit fix --force
+[00:17:43.215] 
+[00:17:43.215] Run `npm audit` for details.
+[00:17:43.253] Detected Next.js version: 15.4.1
+[00:17:43.254] Running "npm run build"
+[00:17:43.379] 
+[00:17:43.379] > promptvault@0.1.0 build
+[00:17:43.379] > next build
+[00:17:43.379] 
+[00:17:44.757]    ▲ Next.js 15.4.1
+[00:17:44.757] 
+[00:17:44.801]    Creating an optimized production build ...
+[00:18:01.761] <w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (150kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+[00:18:07.582]  ✓ Compiled successfully in 18.0s
+[00:18:07.586]    Linting and checking validity of types ...
+[00:18:12.177] 
+[00:18:12.178] ./src/app/prompts/prompts-view.tsx
+[00:18:12.178] 52:6  Warning: React Hook useEffect has a missing dependency: 'fetchPrompts'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+[00:18:12.178] 
+[00:18:12.178] ./src/app/settings/profile/profile-form.tsx
+[00:18:12.178] 73:15  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+[00:18:12.178] 
+[00:18:12.178] ./src/app/team/page.tsx
+[00:18:12.178] 84:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+[00:18:12.179] 
+[00:18:12.179] info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+[00:18:20.884] Failed to compile.
+[00:18:20.884] 
+[00:18:20.884] ./src/lib/services/file-processing.ts:143:22
+[00:18:20.884] Type error: Property 'where' does not exist on type 'Omit<PgSelectBase<"tags", { id: PgColumn<{ name: "id"; tableName: "tags"; dataType: "string"; columnType: "PgUUID"; data: string; driverParam: string; notNull: true; hasDefault: true; isPrimaryKey: true; isAutoincrement: false; ... 4 more ...; generated: undefined; }, {}, {}>; name: PgColumn<...>; userId: PgColumn<....'.
+[00:18:20.884] 
+[00:18:20.884] [0m [90m 141 |[39m                     [33m.[39m[36mfrom[39m(tags)
+[00:18:20.884]  [90m 142 |[39m                     [33m.[39mwhere(eq(tags[33m.[39muserId[33m,[39m userId))
+[00:18:20.885] [31m[1m>[22m[39m[90m 143 |[39m                     [33m.[39mwhere(eq(tags[33m.[39mname[33m,[39m tagName))
+[00:18:20.885]  [90m     |[39m                      [31m[1m^[22m[39m
+[00:18:20.885]  [90m 144 |[39m                     [33m.[39mlimit([35m1[39m)[33m;[39m
+[00:18:20.885]  [90m 145 |[39m
+[00:18:20.885]  [90m 146 |[39m                   [90m// Create tag if it doesn't exist[39m[0m
+[00:18:20.926] Next.js build worker exited with code: 1 and signal: null
+[00:18:20.950] Error: Command "npm run build" exited with 1
+[00:18:21.307] 
+[00:18:24.329] Exiting build container
