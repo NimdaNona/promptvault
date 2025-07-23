@@ -158,12 +158,10 @@ async function processInBackground(
     // Update session - completed
     await updateImportSession(sessionId, {
       status: 'completed',
-      processedCount: processedPrompts.length,
-      results: {
-        imported: processedPrompts.length,
-        skipped: extractedPrompts.length - processedPrompts.length,
-        errors: [],
-      },
+      totalPrompts: extractedPrompts.length,
+      processedPrompts: processedPrompts.length,
+      failedPrompts: extractedPrompts.length - processedPrompts.length,
+      completedAt: new Date(),
     });
 
     importProgress.updateProgress(sessionId, {

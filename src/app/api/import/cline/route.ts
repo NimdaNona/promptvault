@@ -209,12 +209,9 @@ export async function POST(request: NextRequest) {
       // Update import session with results
       await updateImportSession(session.id, {
         status: 'completed',
-        processedCount: processedPrompts.length,
-        results: {
-          imported: processedPrompts.length,
-          skipped: extractedPrompts.length - processedPrompts.length,
-          errors: [],
-        },
+        processedPrompts: processedPrompts.length,
+        totalPrompts: extractedPrompts.length,
+        failedPrompts: extractedPrompts.length - processedPrompts.length,
       });
 
       importProgress.updateProgress(session.id, {

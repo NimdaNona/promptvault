@@ -58,14 +58,14 @@ export default function ImportPage() {
   const [recentImports, setRecentImports] = useState([
     {
       id: "1",
-      source: "ChatGPT",
+      platform: "ChatGPT",
       status: "completed",
       promptsFound: 156,
       date: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
     },
     {
       id: "2",
-      source: "Claude",
+      platform: "Claude",
       status: "processing",
       promptsFound: 0,
       date: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
@@ -163,7 +163,7 @@ export default function ImportPage() {
                 {recentImports.map((import_) => (
                   <tr key={import_.id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                      {import_.source}
+                      {import_.platform}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-2">

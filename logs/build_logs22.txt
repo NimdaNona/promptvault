@@ -1,0 +1,60 @@
+[00:04:31.984] Running build in Washington, D.C., USA (East) – iad1
+[00:04:31.984] Build machine configuration: 4 cores, 8 GB
+[00:04:32.013] Cloning github.com/NimdaNona/promptvault (Branch: main, Commit: 091a5b2)
+[00:04:32.610] Cloning completed: 597.000ms
+[00:04:35.688] Restored build cache from previous deployment (GYB3C9sGW8TyeNjf5U2Tx7KHLWt9)
+[00:04:39.164] Running "vercel build"
+[00:04:39.722] Vercel CLI 44.5.0
+[00:04:39.915] Detected OpenTelemetry dependency: @vercel/otel@1.13.0, which meets the minimum version requirement of 1.11.0
+[00:04:40.431] Running "install" command: `npm install`...
+[00:04:43.254] 
+[00:04:43.254] added 44 packages, and audited 807 packages in 3s
+[00:04:43.255] 
+[00:04:43.255] 187 packages are looking for funding
+[00:04:43.255]   run `npm fund` for details
+[00:04:43.275] 
+[00:04:43.275] 4 moderate severity vulnerabilities
+[00:04:43.275] 
+[00:04:43.275] To address all issues (including breaking changes), run:
+[00:04:43.275]   npm audit fix --force
+[00:04:43.275] 
+[00:04:43.275] Run `npm audit` for details.
+[00:04:43.316] Detected Next.js version: 15.4.1
+[00:04:43.317] Running "npm run build"
+[00:04:43.450] 
+[00:04:43.450] > promptvault@0.1.0 build
+[00:04:43.450] > next build
+[00:04:43.450] 
+[00:04:44.783]    ▲ Next.js 15.4.1
+[00:04:44.783] 
+[00:04:44.830]    Creating an optimized production build ...
+[00:05:02.997] <w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (150kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+[00:05:09.572]  ✓ Compiled successfully in 20.0s
+[00:05:09.578]    Linting and checking validity of types ...
+[00:05:14.433] 
+[00:05:14.433] ./src/app/prompts/prompts-view.tsx
+[00:05:14.433] 52:6  Warning: React Hook useEffect has a missing dependency: 'fetchPrompts'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+[00:05:14.434] 
+[00:05:14.434] ./src/app/settings/profile/profile-form.tsx
+[00:05:14.434] 73:15  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+[00:05:14.434] 
+[00:05:14.434] ./src/app/team/page.tsx
+[00:05:14.434] 84:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+[00:05:14.435] 
+[00:05:14.435] info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+[00:05:23.739] Failed to compile.
+[00:05:23.739] 
+[00:05:23.739] ./src/app/api/import/cline-background/route.ts:161:7
+[00:05:23.739] Type error: Object literal may only specify known properties, and 'processedCount' does not exist in type '{ status?: "pending" | "processing" | "completed" | "failed" | undefined; totalPrompts?: number | undefined; processedPrompts?: number | undefined; failedPrompts?: number | undefined; error?: string | undefined; metadata?: any; completedAt?: Date | undefined; }'.
+[00:05:23.739] 
+[00:05:23.740] [0m [90m 159 |[39m     [36mawait[39m updateImportSession(sessionId[33m,[39m {
+[00:05:23.740]  [90m 160 |[39m       status[33m:[39m [32m'completed'[39m[33m,[39m
+[00:05:23.740] [31m[1m>[22m[39m[90m 161 |[39m       processedCount[33m:[39m processedPrompts[33m.[39mlength[33m,[39m
+[00:05:23.740]  [90m     |[39m       [31m[1m^[22m[39m
+[00:05:23.740]  [90m 162 |[39m       results[33m:[39m {
+[00:05:23.740]  [90m 163 |[39m         imported[33m:[39m processedPrompts[33m.[39mlength[33m,[39m
+[00:05:23.740]  [90m 164 |[39m         skipped[33m:[39m extractedPrompts[33m.[39mlength [33m-[39m processedPrompts[33m.[39mlength[33m,[39m[0m
+[00:05:23.789] Next.js build worker exited with code: 1 and signal: null
+[00:05:23.816] Error: Command "npm run build" exited with 1
+[00:05:24.245] 
+[00:05:27.441] Exiting build container
