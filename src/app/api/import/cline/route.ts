@@ -52,7 +52,9 @@ export async function POST(request: NextRequest) {
 
     // Check if we should use background processing for large imports
     const totalSize = files.reduce((sum, f) => sum + f.content.length, 0);
-    const shouldUseBackground = options.useBackground || totalSize > 1000000; // 1MB
+    const totalFiles = files.length;
+    // Use background for large imports or many files
+    const shouldUseBackground = options.useBackground || totalSize > 500000 || totalFiles > 10; // 500KB or 10+ files
 
     if (shouldUseBackground) {
       // Create session and redirect to background processor
@@ -319,14 +321,48 @@ export async function GET(request: NextRequest) {
       return new Response('User not found', { status: 404 });
     }
 
-    // Stream progress updates
-    const stream = importProgress.streamProgress(sessionId);
+    // Create a manual SSE stream that works with Edge Runtime
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        // Send initial progress
+        const initialProgress = importProgress.getProgress(sessionId);
+        if (initialProgress) {
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify(initialProgress)}\n\n`)
+          );
+        }
+
+        // Set up polling for progress updates
+        const pollInterval = setInterval(() => {
+          const progress = importProgress.getProgress(sessionId);
+          if (progress) {
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify(progress)}\n\n`)
+            );
+            
+            // Close stream when complete
+            if (progress.status === 'completed' || progress.status === 'failed') {
+              clearInterval(pollInterval);
+              controller.close();
+            }
+          }
+        }, 1000); // Poll every second
+
+        // Clean up after 60 seconds max
+        setTimeout(() => {
+          clearInterval(pollInterval);
+          controller.close();
+        }, 60000);
+      },
+    });
 
     return new Response(stream, {
       headers: {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
         'Connection': 'keep-alive',
+        'X-Accel-Buffering': 'no', // Disable Nginx buffering
       },
     });
 

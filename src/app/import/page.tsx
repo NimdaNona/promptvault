@@ -7,46 +7,46 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@clerk/nextjs";
 import { useFeatureFlag } from "@/lib/features/flags";
+import ImportDialog from "@/components/import-dialog";
+import type { ImportSource } from "@/lib/importers";
 
 export default function ImportPage() {
   const { userId } = useAuth();
   const clineImportEnabled = useFeatureFlag('cline_import', userId || undefined);
+  const [selectedSource, setSelectedSource] = useState<ImportSource | null>(null);
+  const [showImportDialog, setShowImportDialog] = useState(false);
   
   // Base import options that are always available
   const baseImportOptions = [
     {
-      id: "chatgpt",
+      id: "chatgpt" as ImportSource,
       name: "ChatGPT",
       icon: MessageSquare,
       description: "Import conversations from ChatGPT",
-      href: "/onboarding?tab=chatgpt",
       status: "available",
       formats: ["JSON export"]
     },
     {
-      id: "claude",
+      id: "claude" as ImportSource,
       name: "Claude",
       icon: Brain,
       description: "Import conversations from Claude",
-      href: "/onboarding?tab=claude",
       status: "available",
       formats: ["JSON export"]
     },
     {
-      id: "gemini",
+      id: "gemini" as ImportSource,
       name: "Google Gemini",
       icon: MessageSquare,
       description: "Import conversations from Google Gemini",
-      href: "/onboarding?tab=gemini",
       status: "available",
       formats: ["JSON export"]
     },
     {
-      id: "cursor",
+      id: "cursor" as ImportSource,
       name: "Cursor",
       icon: Terminal,
       description: "Import AI coding sessions from Cursor",
-      href: "/onboarding?tab=cursor",
       status: "available",
       formats: ["JSON export", "Markdown"]
     }
@@ -55,11 +55,10 @@ export default function ImportPage() {
   // Conditionally add Cline import option based on feature flag
   const importOptions = clineImportEnabled 
     ? [...baseImportOptions.slice(0, 3), {
-        id: "cline",
+        id: "cline" as ImportSource,
         name: "Cline",
         icon: Code,
         description: "Import AI coding sessions from Cline VSCode extension",
-        href: "/onboarding?tab=cline",
         status: "available",
         formats: ["Markdown export", "VSCode storage folder"]
       }, baseImportOptions[3]]
@@ -115,30 +114,35 @@ export default function ImportPage() {
           {importOptions.map((option) => {
             const Icon = option.icon;
             return (
-              <Link key={option.id} href={option.href}>
-                <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <Icon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-                      <Badge variant="secondary">
-                        {option.status === "available" ? "Available" : "Coming Soon"}
-                      </Badge>
-                    </div>
-                    <CardTitle className="mt-4">{option.name}</CardTitle>
-                    <CardDescription>{option.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      <p>Supported formats:</p>
-                      <ul className="mt-1">
-                        {option.formats.map((format) => (
-                          <li key={format} className="ml-4">• {format}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
+              <Card 
+                key={option.id} 
+                className="hover:shadow-lg transition-shadow cursor-pointer h-full"
+                onClick={() => {
+                  setSelectedSource(option.id);
+                  setShowImportDialog(true);
+                }}
+              >
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <Icon className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                    <Badge variant="secondary">
+                      {option.status === "available" ? "Available" : "Coming Soon"}
+                    </Badge>
+                  </div>
+                  <CardTitle className="mt-4">{option.name}</CardTitle>
+                  <CardDescription>{option.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    <p>Supported formats:</p>
+                    <ul className="mt-1">
+                      {option.formats.map((format) => (
+                        <li key={format} className="ml-4">• {format}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
             );
           })}
         </div>
@@ -204,6 +208,63 @@ export default function ImportPage() {
           </Card>
         )}
       </div>
+
+      {/* Import Dialog */}
+      {showImportDialog && selectedSource && (
+        <ImportDialog
+          source={selectedSource}
+          onClose={() => {
+            setShowImportDialog(false);
+            setSelectedSource(null);
+          }}
+          onImport={async (prompts) => {
+            try {
+              // Import prompts via bulk import API
+              const response = await fetch('/api/import/bulk', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  prompts: prompts.map(p => ({
+                    name: p.name,
+                    content: p.content,
+                    folder: p.folder,
+                    metadata: p.metadata,
+                  })),
+                  source: selectedSource,
+                }),
+              });
+
+              if (!response.ok) {
+                throw new Error('Failed to import prompts');
+              }
+
+              const result = await response.json();
+              
+              // Update recent imports to show the new import
+              setRecentImports(prev => [{
+                id: Date.now().toString(),
+                platform: importOptions.find(opt => opt.id === selectedSource)?.name || selectedSource,
+                status: 'completed',
+                promptsFound: result.imported,
+                date: new Date().toISOString(),
+              }, ...prev]);
+
+              // Show success message
+              const { toast } = await import('sonner');
+              toast.success(`Successfully imported ${result.imported} prompts!`);
+              
+              // Close dialog
+              setShowImportDialog(false);
+              setSelectedSource(null);
+            } catch (error) {
+              console.error('Import error:', error);
+              const { toast } = await import('sonner');
+              toast.error('Failed to import prompts. Please try again.');
+            }
+          }}
+          existingPrompts={[]}
+        />
+      )}
     </div>
   );
 }

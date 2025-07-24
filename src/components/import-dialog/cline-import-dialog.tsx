@@ -112,38 +112,82 @@ export default function ClineImportDialog({ onClose, onImport, existingPrompts =
 
       const result = await importResponse.json();
       
-      // Set up SSE for progress tracking
-      if (result.sessionId) {
+      // Handle different response types
+      if (result.background && result.sessionId) {
+        // Background processing with SSE
         const eventSource = new EventSource(`/api/import/cline?sessionId=${result.sessionId}`);
         
+        let hasCompleted = false;
+        
         eventSource.onmessage = (event) => {
-          const progress = JSON.parse(event.data);
-          setImportProgress(progress.progress);
-          setImportStatus(progress.message);
-          
-          if (progress.status === 'completed') {
-            eventSource.close();
-            toast.success(`Successfully imported ${result.imported} prompts!`);
+          try {
+            const progress = JSON.parse(event.data);
+            console.log('SSE Progress:', progress);
             
-            // Call parent import handler with the imported prompts
-            onImport(result.prompts).then(() => {
-              onClose();
-            });
-          } else if (progress.status === 'failed') {
-            eventSource.close();
-            throw new Error(progress.message);
+            setImportProgress(progress.progress);
+            setImportStatus(progress.message);
+            
+            if (progress.status === 'completed' && !hasCompleted) {
+              hasCompleted = true;
+              eventSource.close();
+              
+              // Extract imported count from metadata or use default
+              const importedCount = progress.metadata?.imported || result.imported || 0;
+              toast.success(`Successfully imported ${importedCount} prompts!`);
+              
+              // Since we're using background processing, we need to refresh
+              // the page or fetch the new prompts
+              setTimeout(() => {
+                window.location.href = '/dashboard';
+              }, 1500);
+            } else if (progress.status === 'failed') {
+              eventSource.close();
+              throw new Error(progress.message || 'Import failed');
+            }
+          } catch (error) {
+            console.error('SSE parsing error:', error);
           }
         };
 
-        eventSource.onerror = () => {
+        eventSource.onerror = (error) => {
+          console.error('SSE error:', error);
           eventSource.close();
-          setImportStatus("Connection lost. Import may still be processing.");
+          
+          // Check if import might have succeeded despite SSE error
+          if (importProgress > 90) {
+            toast.success("Import completed! Redirecting...");
+            setTimeout(() => {
+              window.location.href = '/dashboard';
+            }, 1500);
+          } else {
+            setImportStatus("Connection lost. Import may still be processing.");
+            setIsImporting(false);
+          }
         };
-      } else {
-        // Fallback if no session ID
+        
+        // Set a timeout in case SSE fails completely
+        setTimeout(() => {
+          if (!hasCompleted && importProgress < 100) {
+            eventSource.close();
+            toast.info("Import is taking longer than expected. Check your dashboard for results.");
+            setTimeout(() => {
+              window.location.href = '/dashboard';
+            }, 2000);
+          }
+        }, 30000); // 30 second timeout
+        
+      } else if (result.prompts && result.imported !== undefined) {
+        // Immediate response with prompts
         toast.success(`Successfully imported ${result.imported} prompts!`);
         await onImport(result.prompts);
         onClose();
+      } else {
+        // Unexpected response format
+        console.error('Unexpected import response:', result);
+        toast.error('Import completed with unknown status. Check your dashboard.');
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 2000);
       }
 
     } catch (error) {
