@@ -8,6 +8,8 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 10;
 
 export async function POST(request: NextRequest) {
+  console.log('[Cline Import API] POST request received');
+  
   try {
     // Dynamic imports to reduce bundle size and improve serverless performance
     const { auth } = await import('@clerk/nextjs/server');
@@ -15,7 +17,10 @@ export async function POST(request: NextRequest) {
     
     // Check authentication
     const { userId } = await auth();
+    console.log('[Cline Import API] User ID:', userId);
+    
     if (!userId) {
+      console.error('[Cline Import API] No user ID - unauthorized');
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -24,11 +29,12 @@ export async function POST(request: NextRequest) {
 
     // Parse and validate request body
     const body = await request.json();
+    console.log('[Cline Import API] Request body:', JSON.stringify(body, null, 2));
     
     // Schema for import request
     const ClineImportSchema = z.object({
       files: z.array(z.object({
-        url: z.string().url(),
+        url: z.string(), // Allow any string for URL (including data URLs and local refs)
         filename: z.string(),
         content: z.string(),
       })).min(1).max(50),
@@ -42,11 +48,14 @@ export async function POST(request: NextRequest) {
     
     const validation = ClineImportSchema.safeParse(body);
     if (!validation.success) {
+      console.error('[Cline Import API] Validation failed:', validation.error.errors);
       return NextResponse.json(
         { error: 'Invalid request', details: validation.error.errors },
         { status: 400 }
       );
     }
+    
+    console.log('[Cline Import API] Validation passed');
 
     const { files, options = {} } = validation.data;
 

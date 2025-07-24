@@ -57,41 +57,41 @@ export default function ClineImportDialog({ onClose, onImport, existingPrompts =
   const processImport = async () => {
     if (files.length === 0) return;
 
+    console.log('[Cline Import] Starting import process with files:', files);
     setIsImporting(true);
     setImportProgress(0);
     setImportStatus("Uploading files...");
 
     try {
-      // Upload all files
+      // Read file contents directly
       const uploadedFiles = [];
       for (let i = 0; i < files.length; i++) {
         const { file } = files[i];
-        setImportStatus(`Uploading file ${i + 1} of ${files.length}...`);
-        setImportProgress((i / files.length) * 30); // 0-30% for uploads
+        setImportStatus(`Reading file ${i + 1} of ${files.length}...`);
+        setImportProgress((i / files.length) * 30); // 0-30% for reading
 
-        const formData = new FormData();
-        formData.append('file', file);
-
-        const uploadResponse = await fetch('/api/import/upload', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!uploadResponse.ok) {
-          throw new Error(`Failed to upload ${file.name}`);
+        console.log(`[Cline Import] Reading file ${i + 1}/${files.length}: ${file.name}`);
+        
+        try {
+          const content = await file.text();
+          console.log(`[Cline Import] File content length: ${content.length} chars`);
+          
+          uploadedFiles.push({
+            url: `local:///${file.name}`,
+            filename: file.name,
+            content: content
+          });
+        } catch (readError) {
+          console.error('[Cline Import] Failed to read file:', readError);
+          throw new Error(`Failed to read ${file.name}: ${readError}`);
         }
-
-        const uploadResult = await uploadResponse.json();
-        uploadedFiles.push({
-          url: uploadResult.url,
-          filename: file.name,
-          content: uploadResult.content
-        });
       }
 
       // Send to Cline import API
       setImportStatus("Processing Cline markdown files...");
       setImportProgress(40);
+
+      console.log('[Cline Import] Sending to import API with files:', uploadedFiles);
 
       const importResponse = await fetch('/api/import/cline', {
         method: 'POST',
@@ -100,17 +100,28 @@ export default function ClineImportDialog({ onClose, onImport, existingPrompts =
           files: uploadedFiles,
           options: {
             skipAI: false,
-            tags: ['Cline', 'VSCode']
+            tags: ['Cline', 'VSCode'],
+            useBackground: false // Force synchronous processing for now
           }
         })
       });
 
+      console.log('[Cline Import] Import API response status:', importResponse.status);
+
       if (!importResponse.ok) {
-        const error = await importResponse.json();
-        throw new Error(error.details || 'Import failed');
+        const errorText = await importResponse.text();
+        console.error('[Cline Import] Import API failed:', errorText);
+        let error;
+        try {
+          error = JSON.parse(errorText);
+        } catch {
+          error = { details: errorText };
+        }
+        throw new Error(error.details || error.error || 'Import failed');
       }
 
       const result = await importResponse.json();
+      console.log('[Cline Import] Import API result:', result);
       
       // Handle different response types
       if (result.background && result.sessionId) {

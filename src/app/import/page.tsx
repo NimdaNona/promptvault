@@ -63,22 +63,13 @@ export default function ImportPage() {
         formats: ["Markdown export", "VSCode storage folder"]
       }, baseImportOptions[3]]
     : baseImportOptions;
-  const [recentImports, setRecentImports] = useState([
-    {
-      id: "1",
-      platform: "ChatGPT",
-      status: "completed",
-      promptsFound: 156,
-      date: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-    },
-    {
-      id: "2",
-      platform: "Claude",
-      status: "processing",
-      promptsFound: 0,
-      date: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-    }
-  ]);
+  const [recentImports, setRecentImports] = useState<Array<{
+    id: string;
+    platform: string;
+    status: string;
+    promptsFound: number;
+    date: string;
+  }>>([]); // Start with empty array - no fake data
 
   const getStatusIcon = (status: string) => {
     switch(status) {
