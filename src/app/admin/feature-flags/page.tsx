@@ -185,8 +185,8 @@ export default function FeatureFlagsPage() {
                     <span className="text-sm font-medium">{flag.rolloutPercentage}%</span>
                   </div>
                   <Slider
-                    value={[flag.rolloutPercentage]}
-                    onValueChange={([value]) => handleRolloutChange(flag.name, value)}
+                    value={flag.rolloutPercentage}
+                    onValueChange={(value) => handleRolloutChange(flag.name, value)}
                     max={100}
                     step={5}
                     className="w-full"
@@ -235,7 +235,7 @@ export default function FeatureFlagsPage() {
                 <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                   <p className="text-sm text-blue-700 dark:text-blue-300">
                     <strong>Note:</strong> This flag controls the visibility of the Cline import option
-                    on the imports page. When disabled, users won't see the Cline import card.
+                    on the imports page. When disabled, users won&apos;t see the Cline import card.
                   </p>
                 </div>
               )}

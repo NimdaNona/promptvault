@@ -1,8 +1,8 @@
 import { ParsedPrompt, ImportPlatform } from '@/lib/types/import';
-import { ChatGPTParser } from '@/lib/importers/chatgpt';
+import { parseChatGPTExport } from '@/lib/importers/chatgpt';
 import { ClaudeParser } from '@/lib/importers/claude-new';
 import { GeminiParser } from '@/lib/importers/gemini-new';
-import { ClineParser } from '@/lib/importers/cline-new';
+import { parseClineExport } from '@/lib/importers/cline';
 import { CursorParser } from '@/lib/importers/cursor-new';
 import { AICategorizer } from './ai-categorizer';
 import { db } from '@/lib/db';
@@ -27,17 +27,15 @@ interface ProcessResult {
 
 export class FileProcessingService {
   private categorizer: AICategorizer;
-  private parsers: Record<ImportPlatform, any>;
+  private claudeParser: ClaudeParser;
+  private geminiParser: GeminiParser;
+  private cursorParser: CursorParser;
 
   constructor() {
     this.categorizer = new AICategorizer();
-    this.parsers = {
-      chatgpt: new ChatGPTParser(),
-      claude: new ClaudeParser(),
-      gemini: new GeminiParser(),
-      cline: new ClineParser(),
-      cursor: new CursorParser()
-    };
+    this.claudeParser = new ClaudeParser();
+    this.geminiParser = new GeminiParser();
+    this.cursorParser = new CursorParser();
   }
 
   async processFile(options: ProcessFileOptions): Promise<ProcessResult> {
@@ -54,12 +52,43 @@ export class FileProcessingService {
     await onProgress?.(20, 'Parsing file...');
 
     // Parse prompts using platform-specific parser
-    const parser = this.parsers[platform];
-    if (!parser) {
-      throw new Error(`Unsupported platform: ${platform}`);
+    let parsedPrompts: ParsedPrompt[] = [];
+    
+    switch (platform) {
+      case 'chatgpt':
+        // Convert ExtractedPrompt to ParsedPrompt
+        const chatgptPrompts = parseChatGPTExport(content);
+        parsedPrompts = chatgptPrompts.map(p => ({
+          id: `${p.metadata.source}-${p.metadata.conversationId}-${Date.now()}`,
+          content: p.content,
+          title: p.title,
+          timestamp: p.metadata.timestamp ? new Date(p.metadata.timestamp) : new Date(),
+          metadata: p.metadata
+        }));
+        break;
+      case 'claude':
+        parsedPrompts = await this.claudeParser.parse(content);
+        break;
+      case 'gemini':
+        parsedPrompts = await this.geminiParser.parse(content);
+        break;
+      case 'cline':
+        // Convert ExtractedPrompt to ParsedPrompt
+        const clinePrompts = parseClineExport(content);
+        parsedPrompts = clinePrompts.map(p => ({
+          id: `${p.metadata.source}-${p.metadata.conversationId}-${Date.now()}`,
+          content: p.content,
+          title: p.title,
+          timestamp: p.metadata.timestamp ? new Date(p.metadata.timestamp) : new Date(),
+          metadata: p.metadata
+        }));
+        break;
+      case 'cursor':
+        parsedPrompts = await this.cursorParser.parse(content);
+        break;
+      default:
+        throw new Error(`Unsupported platform: ${platform}`);
     }
-
-    const parsedPrompts = await parser.parse(content);
     const totalPrompts = parsedPrompts.length;
 
     await onProgress?.(30, `Found ${totalPrompts} prompts. Starting processing...`);

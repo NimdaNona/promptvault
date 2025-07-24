@@ -14,12 +14,25 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get user and check if they're admin
+    // Get user
     const user = await db.query.users.findFirst({
       where: eq(users.id, userId),
     });
 
-    if (!user || user.role !== 'admin') {
+    if (!user) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
+    }
+
+    // Check if user is admin based on their ID or email
+    // For now, we'll use a simple approach - you can configure this
+    // via environment variable or database field later
+    const adminEmails = process.env.ADMIN_EMAILS?.split(',') || [];
+    const isAdmin = adminEmails.includes(user.email) || user.tier === 'enterprise';
+
+    if (!isAdmin) {
       return NextResponse.json(
         { error: 'Admin access required' },
         { status: 403 }
@@ -28,7 +41,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      role: user.role,
+      isAdmin: true,
+      tier: user.tier,
     });
 
   } catch (error) {

@@ -20,7 +20,18 @@ export async function GET(request: NextRequest) {
       where: eq(users.id, userId),
     });
 
-    if (!user || user.role !== 'admin') {
+    if (!user) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
+    }
+
+    // Check if user is admin
+    const adminEmails = process.env.ADMIN_EMAILS?.split(',') || [];
+    const isAdmin = adminEmails.includes(user.email) || user.tier === 'enterprise';
+
+    if (!isAdmin) {
       return NextResponse.json(
         { error: 'Admin access required' },
         { status: 403 }
@@ -36,10 +47,10 @@ export async function GET(request: NextRequest) {
     const sessions = await db.query.importSessions.findMany({
       where: and(
         eq(importSessions.platform, 'cline'),
-        gte(importSessions.createdAt, startDate),
-        lte(importSessions.createdAt, endDate)
+        gte(importSessions.startedAt, startDate),
+        lte(importSessions.startedAt, endDate)
       ),
-      orderBy: desc(importSessions.createdAt),
+      orderBy: desc(importSessions.startedAt),
       limit: 100,
     });
 
@@ -66,7 +77,7 @@ export async function GET(request: NextRequest) {
     const recentSessions = sessions.slice(0, 10).map(session => ({
       sessionId: session.id,
       userId: session.userId,
-      timestamp: session.createdAt,
+      timestamp: session.startedAt,
       success: session.status === 'completed',
       promptsImported: session.processedPrompts || 0,
     }));

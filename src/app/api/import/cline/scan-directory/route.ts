@@ -199,7 +199,7 @@ export async function POST(request: NextRequest) {
     // Calculate total files and size
     const totalFiles = results.reduce((sum, r) => sum + r.files.length, 0);
     const totalSize = results.reduce((sum, r) => 
-      sum + r.files.reduce((s, f) => s + f.size, 0), 0
+      sum + r.files.reduce((s: number, f: any) => s + f.size, 0), 0
     );
     
     return NextResponse.json({

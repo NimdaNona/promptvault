@@ -191,9 +191,10 @@ export function ClineImportDashboard() {
                   data={successRate}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
+                  labelLine={false}
+                  label={(entry) => `${entry.name}: ${entry.value}%`}
                   outerRadius={80}
-                  paddingAngle={5}
+                  fill="#8884d8"
                   dataKey="value"
                 >
                   {successRate.map((entry, index) => (
@@ -216,10 +217,14 @@ export function ClineImportDashboard() {
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={errorDistribution}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
+                <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="value" fill="#8884d8" />
+                <Bar dataKey="value">
+                  {errorDistribution.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
