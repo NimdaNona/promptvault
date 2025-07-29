@@ -80,11 +80,13 @@ export class ClineMarkdownParser {
     let timestamp: string | undefined;
     
     // Check for user message (more flexible matching)
-    if (firstLine.match(/^(\*\*|###?\s*)(Human|User)/i)) {
+    // Matches: ### Human, ### User, **User:**, etc
+    if (firstLine.match(/^(\*\*|###?\s*)(Human|User)(:?\*\*)?/i)) {
       role = 'user';
     }
     // Check for assistant message
-    else if (firstLine.match(/^(\*\*|###?\s*)(Assistant|Cline|AI|Bot)/i)) {
+    // Matches: ### Assistant, ### Cline, **Assistant:**, etc
+    else if (firstLine.match(/^(\*\*|###?\s*)(Assistant|Cline|AI|Bot)(:?\*\*)?/i)) {
       role = 'assistant';
     }
     
@@ -222,7 +224,8 @@ export class ClineMarkdownParser {
       
       // Also start conversation if we see message markers without explicit section
       if (!inConversation && (trimmedLine === '### Human' || trimmedLine === '### User' || 
-          trimmedLine === '### Assistant' || trimmedLine === '### Cline')) {
+          trimmedLine === '### Assistant' || trimmedLine === '### Cline' ||
+          trimmedLine === '**User:**' || trimmedLine === '**Assistant:**')) {
         inConversation = true;
       }
       
@@ -234,7 +237,8 @@ export class ClineMarkdownParser {
       
       // Parse messages in conversation
       if (inConversation) {
-        if (trimmedLine === '### Human' || trimmedLine === '### User') {
+        // Handle both old format (### Human/User) and new format (**User:**)
+        if (trimmedLine === '### Human' || trimmedLine === '### User' || trimmedLine === '**User:**') {
           // Save previous message if exists
           if (messageBuffer.length > 0 && currentRole) {
             const content = messageBuffer.join('\n').trim();
@@ -246,7 +250,7 @@ export class ClineMarkdownParser {
           currentRole = 'user';
           messageBuffer = [];
         }
-        else if (trimmedLine === '### Assistant' || trimmedLine === '### Cline') {
+        else if (trimmedLine === '### Assistant' || trimmedLine === '### Cline' || trimmedLine === '**Assistant:**') {
           // Save previous message if exists
           if (messageBuffer.length > 0 && currentRole) {
             const content = messageBuffer.join('\n').trim();
@@ -261,6 +265,18 @@ export class ClineMarkdownParser {
         else if (currentRole) {
           // Collect message content
           messageBuffer.push(line);
+        } else if (!currentRole && trimmedLine) {
+          // If we haven't detected a role yet but are in conversation and see content,
+          // try to detect if it's the start of a conversation
+          if (i < lines.length - 1) {
+            const nextLine = lines[i + 1].trim();
+            if (nextLine === '**User:**' || nextLine === '**Assistant:**' || 
+                nextLine === '### Human' || nextLine === '### User' || 
+                nextLine === '### Assistant' || nextLine === '### Cline') {
+              // This line is probably a title or header before the conversation starts
+              continue;
+            }
+          }
         }
       }
     }
@@ -353,7 +369,8 @@ export class ClineMarkdownParser {
         }
       }
       // Check for message start (flexible matching)
-      else if (line.trim().match(/^(\*\*|###?\s*)(Human|User|Assistant|Cline|AI|Bot)/i)) {
+      // Matches: ### Human, ### User, **User:**, ### Assistant, **Assistant:**, etc
+      else if (line.trim().match(/^(\*\*|###?\s*)(Human|User|Assistant|Cline|AI|Bot)(:?\*\*)?/i)) {
         // Process previous message if any
         if (messageLines.length > 0) {
           const message = this.parseMessage(messageLines);
