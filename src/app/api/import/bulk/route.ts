@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { prompts, importSessions, users } from "@/lib/db/schema";
 import { eq, sql } from "drizzle-orm";
+import { nanoid } from "nanoid";
 
 // Force Node.js runtime
 export const runtime = 'nodejs';
@@ -21,8 +22,8 @@ export async function POST(req: Request) {
       return Response.json({ error: "No prompts provided" }, { status: 400 });
     }
 
-    // Create import session
-    const sessionId = `import-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+    // Create import session with nanoid to match the expected format
+    const sessionId = `import_${Date.now()}_${nanoid(6)}`;
     const [importSession] = await db.insert(importSessions).values({
       id: sessionId,
       userId,
