@@ -7,8 +7,11 @@ import { eq } from "drizzle-orm";
 export const runtime = 'nodejs';
 
 export async function POST(req: Request) {
+  let authUserId: string | null = null;
+  
   try {
-    const { userId: authUserId } = await auth();
+    const authResult = await auth();
+    authUserId = authResult.userId;
     
     if (!authUserId) {
       return new Response("Unauthorized", { status: 401 });
@@ -65,7 +68,9 @@ export async function POST(req: Request) {
     // If it's a duplicate key error, return success anyway
     if (error instanceof Error && error.message.includes('duplicate key')) {
       console.log("User already exists (caught in error), returning success");
-      return new Response(JSON.stringify({ message: "User already exists", userId: authUserId }), { 
+      // Try to get userId from the error context or use the authUserId
+      const responseUserId = authUserId || 'unknown';
+      return new Response(JSON.stringify({ message: "User already exists", userId: responseUserId }), { 
         status: 200,
         headers: { 'Content-Type': 'application/json' }
       });
