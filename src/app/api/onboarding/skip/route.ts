@@ -28,7 +28,11 @@ export async function POST(req: Request) {
     });
 
     if (existingUser) {
-      return new Response("User already exists", { status: 400 });
+      // User already exists, just return success
+      return new Response(JSON.stringify({ message: "User already exists", userId }), { 
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     // Create user without initial prompt
@@ -38,7 +42,10 @@ export async function POST(req: Request) {
       name,
     });
 
-    return new Response("User created successfully", { status: 200 });
+    return new Response(JSON.stringify({ message: "User created successfully", userId }), { 
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
   } catch (error) {
     console.error("Skip onboarding error:", error);
     return new Response("Internal server error", { status: 500 });

@@ -93,6 +93,9 @@ export default function ClineImportDialog({ onClose, onImport, existingPrompts =
 
       console.log('[Cline Import] Sending to import API with files:', uploadedFiles);
 
+      // Check if we're in onboarding flow
+      const isOnboarding = window.location.pathname === '/onboarding';
+
       const importResponse = await fetch('/api/import/cline', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -101,7 +104,8 @@ export default function ClineImportDialog({ onClose, onImport, existingPrompts =
           options: {
             skipAI: false,
             tags: ['Cline', 'VSCode'],
-            useBackground: false // Force synchronous processing for now
+            useBackground: false, // Force synchronous processing for now
+            extractOnly: isOnboarding // Extract only during onboarding
           }
         })
       });
@@ -122,6 +126,9 @@ export default function ClineImportDialog({ onClose, onImport, existingPrompts =
 
       const result = await importResponse.json();
       console.log('[Cline Import] Import API result:', result);
+      
+      setImportProgress(90);
+      setImportStatus("Finalizing import...");
       
       // Handle different response types
       if (result.background && result.sessionId) {
@@ -187,11 +194,28 @@ export default function ClineImportDialog({ onClose, onImport, existingPrompts =
           }
         }, 30000); // 30 second timeout
         
-      } else if (result.prompts && result.imported !== undefined) {
-        // Immediate response with prompts
-        toast.success(`Successfully imported ${result.imported} prompts!`);
-        await onImport(result.prompts);
-        onClose();
+      } else if (result.prompts) {
+        // Got prompts in response
+        console.log('[Cline Import] Got response with prompts:', result);
+        
+        if (result.extracted !== undefined) {
+          // Extract-only mode (onboarding) - pass prompts to handler
+          console.log('[Cline Import] Extract-only mode - found prompts:', result.extracted);
+          setImportProgress(100);
+          setImportStatus(`Found ${result.extracted} prompts!`);
+          
+          // Give a moment for the UI to update before passing control
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          await onImport(result.prompts);
+          onClose();
+        } else if (result.imported !== undefined) {
+          // Normal import mode - prompts already saved
+          toast.success(`Successfully imported ${result.imported} prompts!`);
+          onClose();
+          // Refresh the page to show new prompts
+          window.location.reload();
+        }
       } else {
         // Unexpected response format
         console.error('Unexpected import response:', result);
@@ -202,11 +226,15 @@ export default function ClineImportDialog({ onClose, onImport, existingPrompts =
       }
 
     } catch (error) {
-      console.error('Import error:', error);
+      console.error('[Cline Import] Import error:', error);
       toast.error(error instanceof Error ? error.message : 'Import failed');
       setImportStatus("Import failed");
+      setImportProgress(0);
     } finally {
-      setIsImporting(false);
+      // Reset state after a delay to ensure UI updates are visible
+      setTimeout(() => {
+        setIsImporting(false);
+      }, 500);
     }
   };
 

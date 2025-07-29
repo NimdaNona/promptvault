@@ -101,39 +101,62 @@ export default function OnboardingWizard({ userId, email, name, clineImportEnabl
   };
 
   const handleImportComplete = async (prompts: any[]) => {
+    console.log("[Onboarding] handleImportComplete called with prompts:", prompts.length);
     setIsCreatingUser(true);
     try {
       // Create user first
+      console.log("[Onboarding] Creating user...");
       const userResponse = await fetch("/api/onboarding/skip", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, email, name }),
       });
 
-      if (!userResponse.ok) throw new Error("Failed to create user");
+      if (!userResponse.ok) {
+        const errorText = await userResponse.text();
+        console.error("[Onboarding] User creation failed:", errorText);
+        throw new Error("Failed to create user");
+      }
+      
+      console.log("[Onboarding] User created successfully");
 
-      // Then import prompts
-      const importResponse = await fetch("/api/import/bulk", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          prompts: prompts.map(p => ({
-            name: p.name,
-            content: p.content,
-            folder: userType ? USER_TYPES.find(t => t.id === userType)?.label : undefined,
-            metadata: p.metadata,
-          })),
-          source: importSource,
-        }),
-      });
+      // Then import prompts if we have any
+      if (prompts && prompts.length > 0) {
+        console.log("[Onboarding] Importing prompts via bulk API...");
+        const importResponse = await fetch("/api/import/bulk", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prompts: prompts.map(p => ({
+              name: p.name || p.title || "Untitled Prompt",
+              content: p.content || p.prompt || "",
+              folder: userType ? USER_TYPES.find(t => t.id === userType)?.label : undefined,
+              metadata: {
+                ...p.metadata,
+                source: importSource,
+                importedAt: new Date().toISOString(),
+              },
+            })),
+            source: importSource,
+          }),
+        });
 
-      if (!importResponse.ok) throw new Error("Failed to import prompts");
+        if (!importResponse.ok) {
+          const errorText = await importResponse.text();
+          console.error("[Onboarding] Import failed:", errorText);
+          throw new Error("Failed to import prompts");
+        }
 
-      const result = await importResponse.json();
-      toast.success(`Successfully imported ${result.imported} prompts!`);
+        const result = await importResponse.json();
+        console.log("[Onboarding] Import successful:", result);
+        toast.success(`Successfully imported ${result.imported} prompts!`);
+      } else {
+        console.log("[Onboarding] No prompts to import");
+      }
+      
       router.push("/dashboard");
     } catch (error) {
-      console.error("Import error:", error);
+      console.error("[Onboarding] Import error:", error);
       toast.error("Failed to complete import. Please try again.");
     } finally {
       setIsCreatingUser(false);

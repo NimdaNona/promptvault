@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
         defaultTags: z.array(z.string()).optional(),
         skipAI: z.boolean().optional(),
         useBackground: z.boolean().optional(), // Option to use background processing
+        extractOnly: z.boolean().optional(), // Option to only extract prompts without saving
       }).optional(),
     });
     
@@ -58,6 +59,29 @@ export async function POST(request: NextRequest) {
     console.log('[Cline Import API] Validation passed');
 
     const { files, options = {} } = validation.data;
+
+    // If extractOnly is true, just parse and return the prompts without saving
+    if (options.extractOnly) {
+      console.log('[Cline Import API] Extract-only mode - parsing files without saving');
+      
+      const { ClineMarkdownParser } = await import('@/lib/importers/cline-markdown-parser');
+      
+      const fileInputs = files.map(f => ({
+        name: f.filename,
+        content: f.content,
+      }));
+
+      const clineParser = new ClineMarkdownParser();
+      const extractedPrompts = await clineParser.parseMultipleFiles(fileInputs);
+      
+      console.log(`[Cline Import API] Extracted ${extractedPrompts.length} prompts`);
+      
+      return NextResponse.json({
+        success: true,
+        prompts: extractedPrompts,
+        extracted: extractedPrompts.length,
+      });
+    }
 
     // Check if we should use background processing for large imports
     const totalSize = files.reduce((sum, f) => sum + f.content.length, 0);
