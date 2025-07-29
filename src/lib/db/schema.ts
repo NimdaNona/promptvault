@@ -111,7 +111,7 @@ export const teamInvites = pgTable('team_invites', {
 
 // Import sessions
 export const importSessions = pgTable('import_sessions', {
-  id: text('id').primaryKey(), // Using text for nanoid
+  id: uuid('id').primaryKey().defaultRandom(), // Using UUID to match database
   userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
   platform: text('platform').notNull(), // 'chatgpt', 'claude', 'cline', 'cursor', 'gemini'
   status: text('status').notNull().default('pending'), // 'pending', 'processing', 'completed', 'failed'

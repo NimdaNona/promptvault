@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { importSessions, tags, promptTags, prompts } from "@/lib/db/schema";
 import { and, eq } from "drizzle-orm";
-import { nanoid } from "nanoid";
+import { randomUUID } from "crypto";
 
 export type ImportSource = 'chatgpt' | 'claude' | 'gemini' | 'cline' | 'cursor' | 'file';
 
@@ -57,7 +57,7 @@ export async function createImportSession(
   source: ImportSource,
   metadata: any
 ): Promise<ImportSession> {
-  const sessionId = `import_${Date.now()}_${nanoid(6)}`;
+  const sessionId = randomUUID();
   const [session] = await db.insert(importSessions).values({
     id: sessionId,
     userId,
