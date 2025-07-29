@@ -11,32 +11,58 @@ export async function POST(req: Request) {
   try {
     const { userId } = await auth();
     
+    console.log("[Import Bulk] Auth user ID:", userId);
+    
     if (!userId) {
+      console.error("[Import Bulk] No auth user ID found");
       return new Response("Unauthorized", { status: 401 });
     }
 
     const body = await req.json();
     const { prompts: importPrompts, source } = body;
+    console.log("[Import Bulk] Request:", { promptCount: importPrompts?.length, source });
 
     if (!Array.isArray(importPrompts) || importPrompts.length === 0) {
       return Response.json({ error: "No prompts provided" }, { status: 400 });
     }
 
+    // First check if user exists
+    console.log("[Import Bulk] Checking if user exists:", userId);
+    const existingUser = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+    });
+    
+    if (!existingUser) {
+      console.error("[Import Bulk] User not found in database:", userId);
+      return Response.json({ error: "User not found. Please complete onboarding first." }, { status: 400 });
+    }
+    
+    console.log("[Import Bulk] User found:", existingUser.email);
+
     // Create import session with proper UUID
     const sessionId = randomUUID();
-    const [importSession] = await db.insert(importSessions).values({
-      id: sessionId,
-      userId,
-      platform: source || 'file',
-      status: 'processing',
-      fileName: 'bulk-import.json',
-      fileSize: JSON.stringify(importPrompts).length,
-      fileType: 'application/json',
-      totalPrompts: importPrompts.length,
-      processedPrompts: 0,
-      failedPrompts: 0,
-      metadata: {},
-    }).returning();
+    console.log("[Import Bulk] Creating import session with ID:", sessionId);
+    
+    try {
+      const [importSession] = await db.insert(importSessions).values({
+        id: sessionId,
+        userId,
+        platform: source || 'file',
+        status: 'processing',
+        fileName: 'bulk-import.json',
+        fileSize: JSON.stringify(importPrompts).length,
+        fileType: 'application/json',
+        totalPrompts: importPrompts.length,
+        processedPrompts: 0,
+        failedPrompts: 0,
+        metadata: {},
+      }).returning();
+      
+      console.log("[Import Bulk] Import session created successfully");
+    } catch (sessionError) {
+      console.error("[Import Bulk] Failed to create import session:", sessionError);
+      throw sessionError;
+    }
 
     // Import prompts in a transaction
     let imported = 0;

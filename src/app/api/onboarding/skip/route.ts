@@ -13,12 +13,16 @@ export async function POST(req: Request) {
     const authResult = await auth();
     authUserId = authResult.userId;
     
+    console.log("[Onboarding Skip] Auth result:", { authUserId });
+    
     if (!authUserId) {
+      console.error("[Onboarding Skip] No auth user ID found");
       return new Response("Unauthorized", { status: 401 });
     }
 
     const body = await req.json();
     const { userId, email, name } = body;
+    console.log("[Onboarding Skip] Request body:", { userId, email, name });
 
     // Verify the userId matches the authenticated user
     if (userId !== authUserId) {
@@ -52,11 +56,19 @@ export async function POST(req: Request) {
     }
 
     // Create user without initial prompt
-    await db.insert(users).values({
-      id: userId,
-      email,
-      name,
-    });
+    console.log("[Onboarding Skip] Creating new user with ID:", userId);
+    
+    try {
+      await db.insert(users).values({
+        id: userId,
+        email,
+        name,
+      });
+      console.log("[Onboarding Skip] User created successfully");
+    } catch (insertError) {
+      console.error("[Onboarding Skip] Failed to insert user:", insertError);
+      throw insertError;
+    }
 
     return new Response(JSON.stringify({ message: "User created successfully", userId }), { 
       status: 200,

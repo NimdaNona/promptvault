@@ -102,19 +102,22 @@ export default function OnboardingWizard({ userId, email, name, clineImportEnabl
 
   const handleImportComplete = async (prompts: any[]) => {
     console.log("[Onboarding] handleImportComplete called with prompts:", prompts.length);
+    console.log("[Onboarding] User details:", { userId, email, name });
     setIsCreatingUser(true);
     try {
       // Create user first
-      console.log("[Onboarding] Creating user...");
+      console.log("[Onboarding] Creating user with ID:", userId);
       const userResponse = await fetch("/api/onboarding/skip", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId, email, name }),
       });
 
+      const responseText = await userResponse.text();
+      console.log("[Onboarding] User creation response:", userResponse.status, responseText);
+
       if (!userResponse.ok) {
-        const errorText = await userResponse.text();
-        console.error("[Onboarding] User creation failed:", errorText);
+        console.error("[Onboarding] User creation failed:", responseText);
         throw new Error("Failed to create user");
       }
       
