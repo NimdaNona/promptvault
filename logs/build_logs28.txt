@@ -1,0 +1,62 @@
+[22:00:09.797] Running build in Washington, D.C., USA (East) – iad1
+[22:00:09.798] Build machine configuration: 4 cores, 8 GB
+[22:00:09.814] Cloning github.com/NimdaNona/promptvault (Branch: main, Commit: 06bc576)
+[22:00:10.120] Cloning completed: 306.000ms
+[22:00:13.635] Restored build cache from previous deployment (AB7dMmzdtCUjeTCN7Qx6AJCRE1K5)
+[22:00:16.271] Running "vercel build"
+[22:00:16.865] Vercel CLI 44.5.0
+[22:00:17.027] Detected OpenTelemetry dependency: @vercel/otel@1.13.0, which meets the minimum version requirement of 1.11.0
+[22:00:17.233] Running "install" command: `npm install`...
+[22:00:19.904] 
+[22:00:19.904] up to date, audited 848 packages in 2s
+[22:00:19.905] 
+[22:00:19.905] 190 packages are looking for funding
+[22:00:19.905]   run `npm fund` for details
+[22:00:19.924] 
+[22:00:19.924] 5 vulnerabilities (1 low, 4 moderate)
+[22:00:19.924] 
+[22:00:19.924] To address issues that do not require attention, run:
+[22:00:19.925]   npm audit fix
+[22:00:19.925] 
+[22:00:19.925] To address all issues (including breaking changes), run:
+[22:00:19.925]   npm audit fix --force
+[22:00:19.925] 
+[22:00:19.925] Run `npm audit` for details.
+[22:00:19.962] Detected Next.js version: 15.4.1
+[22:00:19.964] Running "npm run build"
+[22:00:20.109] 
+[22:00:20.110] > promptvault@0.1.0 build
+[22:00:20.110] > next build
+[22:00:20.110] 
+[22:00:21.457]    ▲ Next.js 15.4.1
+[22:00:21.457] 
+[22:00:21.508]    Creating an optimized production build ...
+[22:00:38.569]  ✓ Compiled successfully in 12.0s
+[22:00:38.575]    Linting and checking validity of types ...
+[22:00:44.208] 
+[22:00:44.209] ./src/app/prompts/prompts-view.tsx
+[22:00:44.209] 52:6  Warning: React Hook useEffect has a missing dependency: 'fetchPrompts'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+[22:00:44.209] 
+[22:00:44.209] ./src/app/settings/profile/profile-form.tsx
+[22:00:44.209] 73:15  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+[22:00:44.209] 
+[22:00:44.209] ./src/app/team/page.tsx
+[22:00:44.209] 84:21  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+[22:00:44.210] 
+[22:00:44.210] info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+[22:00:55.569] Failed to compile.
+[22:00:55.569] 
+[22:00:55.569] ./src/app/api/import/bulk/route.ts:89:32
+[22:00:55.570] Type error: Cannot find name 'importSession'. Did you mean 'importSessions'?
+[22:00:55.570] 
+[22:00:55.570] [0m [90m 87 |[39m             metadata[33m:[39m {
+[22:00:55.570]  [90m 88 |[39m               [33m...[39mprompt[33m.[39mmetadata[33m,[39m
+[22:00:55.570] [31m[1m>[22m[39m[90m 89 |[39m               importSessionId[33m:[39m importSession[33m.[39mid[33m,[39m
+[22:00:55.570]  [90m    |[39m                                [31m[1m^[22m[39m
+[22:00:55.570]  [90m 90 |[39m               importedAt[33m:[39m [36mnew[39m [33mDate[39m()[33m.[39mtoISOString()[33m,[39m
+[22:00:55.570]  [90m 91 |[39m             }[33m,[39m
+[22:00:55.570]  [90m 92 |[39m           })[33m;[39m[0m
+[22:00:55.623] Next.js build worker exited with code: 1 and signal: null
+[22:00:55.647] Error: Command "npm run build" exited with 1
+[22:00:56.112] 
+[22:00:59.363] Exiting build container

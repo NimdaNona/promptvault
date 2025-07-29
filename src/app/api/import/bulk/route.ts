@@ -43,8 +43,9 @@ export async function POST(req: Request) {
     const sessionId = randomUUID();
     console.log("[Import Bulk] Creating import session with ID:", sessionId);
     
+    let importSession;
     try {
-      const [importSession] = await db.insert(importSessions).values({
+      const [session] = await db.insert(importSessions).values({
         id: sessionId,
         userId,
         platform: source || 'file',
@@ -58,6 +59,7 @@ export async function POST(req: Request) {
         metadata: {},
       }).returning();
       
+      importSession = session;
       console.log("[Import Bulk] Import session created successfully");
     } catch (sessionError) {
       console.error("[Import Bulk] Failed to create import session:", sessionError);
@@ -67,6 +69,10 @@ export async function POST(req: Request) {
     // Import prompts in a transaction
     let imported = 0;
     let skipped = 0;
+
+    if (!importSession) {
+      throw new Error("Import session was not created");
+    }
 
     await db.transaction(async (tx) => {
       for (const prompt of importPrompts) {
