@@ -22,7 +22,7 @@ export async function POST(req: Request) {
       return new Response("Unauthorized", { status: 401 });
     }
 
-    // Check if user already exists
+    // Check if user already exists by ID or email
     const existingUser = await db.query.users.findFirst({
       where: eq(users.id, userId),
     });
@@ -30,6 +30,19 @@ export async function POST(req: Request) {
     if (existingUser) {
       // User already exists, just return success
       return new Response(JSON.stringify({ message: "User already exists", userId }), { 
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Also check by email to prevent duplicate email errors
+    const existingUserByEmail = await db.query.users.findFirst({
+      where: eq(users.email, email),
+    });
+
+    if (existingUserByEmail) {
+      // User with this email already exists, return success
+      return new Response(JSON.stringify({ message: "User already exists", userId: existingUserByEmail.id }), { 
         status: 200,
         headers: { 'Content-Type': 'application/json' }
       });
@@ -48,6 +61,16 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     console.error("Skip onboarding error:", error);
+    
+    // If it's a duplicate key error, return success anyway
+    if (error instanceof Error && error.message.includes('duplicate key')) {
+      console.log("User already exists (caught in error), returning success");
+      return new Response(JSON.stringify({ message: "User already exists", userId: authUserId }), { 
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
     return new Response("Internal server error", { status: 500 });
   }
 }
